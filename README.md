@@ -1,10 +1,16 @@
 # RTIOW-rust
 Rust implementation of the code found in the "Ray Tracing In One Weekend" book by Peter Shirley.
 
+<details><summary>Chapter 5</summary>
+  <p align="center">
+    <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/chapter5.jpg" />
+  </p>
+  <p>Hittable Trait implemented. HitRecord and HittableList structs added.</p>
+</details>
 
 <details><summary>Chapter 4</summary>
   <p align="center">
-    <img src="https://github.com/JPDye/RTIOW-rust/blob/Chapter-4/img/chapter4.jpg" />
+    <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/chapter4.jpg" />
   </p>
   <p>Added very basic shpere intersection.</p>
 </details>
@@ -12,7 +18,7 @@ Rust implementation of the code found in the "Ray Tracing In One Weekend" book b
 
 <details><summary>Chapter 3</summary>
   <p align="center">
-    <img src="https://github.com/JPDye/RTIOW-rust/blob/chapter_3/img/chapter3.jpg" />
+    <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/chapter3.jpg" />
   </p>
   <p>Improved Vec3 struct and created Ray struct. Added a ray_colour function.</p>
 </details>
