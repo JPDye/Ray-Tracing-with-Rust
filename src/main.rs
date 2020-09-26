@@ -7,7 +7,24 @@ use colour::*;
 mod ray;
 use ray::*;
 
+
+fn hit_sphere(center: Vec3, radius: f64, r: &Ray) -> bool {
+    let oc = r.origin - center;
+
+    let a = r.direction.dot(&r.direction);
+    let b = oc.dot(&r.direction) * 2.0;
+    let c = oc.dot(&oc) - radius * radius;
+
+    let discriminant = b*b - 4.0*a*c;
+    discriminant > 0.0
+}
+
+
 fn ray_colour(r: &Ray) -> Colour {
+    if hit_sphere(Vec3::new(0.0, 0.0, -1.0), 0.5, r) {
+        return Colour::new(1.0, 0.0, 0.0)
+    }
+
     let norm_dir = r.direction.norm();
     let t = 0.5 * (norm_dir.y + 1.0);
     Colour::new(1.0, 1.0, 1.0) * (1.0 - t) + Colour::new(0.3, 0.5, 1.0) * t
