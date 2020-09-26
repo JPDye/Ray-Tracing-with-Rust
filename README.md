@@ -2,6 +2,14 @@
 Rust implementation of the code found in the "Ray Tracing In One Weekend" book by Peter Shirley.
 
 
+<details><summary>Chapter 4</summary>
+  <p align="center">
+    <img src="https://github.com/JPDye/RTIOW-rust/blob/Chapter-4/img/chapter4.jpg" />
+  </p>
+  <p>Added very basic shpere intersection.</p>
+</details>
+
+
 <details><summary>Chapter 3</summary>
   <p align="center">
     <img src="https://github.com/JPDye/RTIOW-rust/blob/chapter_3/img/chapter3.jpg" />
