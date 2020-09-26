@@ -1,6 +1,5 @@
 # RTIOW-rust
 Rust implementation of the code found in the "Ray Tracing In One Weekend" book by Peter Shirley.
-https://github.com/JPDye/RTIOW-rust/blob/Chapter-5/img/chapter5.jpg
 
 <details><summary>Chapter 5</summary>
   <p align="center">
