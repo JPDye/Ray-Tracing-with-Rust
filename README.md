@@ -1,6 +1,13 @@
 # RTIOW-rust
 Rust implementation of the code found in the "Ray Tracing In One Weekend" book by Peter Shirley.
+https://github.com/JPDye/RTIOW-rust/blob/Chapter-5/img/chapter5.jpg
 
+<details><summary>Chapter 5</summary>
+  <p align="center">
+    <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/chapter5.jpg" />
+  </p>
+  <p>Hittable Trait implemented. HitRecord and HittableList structs added.</p>
+</details>
 
 <details><summary>Chapter 4</summary>
   <p align="center">
