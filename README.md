@@ -2,7 +2,7 @@
 Rust implementation of the code found in the "Ray Tracing In One Weekend" book by Peter Shirley.
 
 
-<details><summary>Chapter 2</summary>
+<details><summary>Chapter 3</summary>
   <p align="center">
     <img src="https://github.com/JPDye/RTIOW-rust/blob/chapter_3/img/chapter3.jpg" />
   </p>
