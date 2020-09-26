@@ -11,6 +11,12 @@ pub struct Colour {
     pub b: f64,
 }
 
+impl Colour {
+    pub fn new(r: f64, g: f64, b: f64) -> Self {
+        Self { r, g, b }
+    }
+}
+
 /// Print Colour as an RGB tuple with each field a U8 between 0 and 255.
 impl fmt::Display for Colour {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

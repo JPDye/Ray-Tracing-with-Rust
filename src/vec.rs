@@ -10,6 +10,10 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
+    pub fn new(x: f64, y: f64, z: f64) -> Self {
+        Self { x, y, z }
+    }
+
     /// The square of the magnitude of the vector. Used to calculate the magnitude. x*x + y*y + z*z.
     pub fn mag_sqr(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
@@ -19,13 +23,32 @@ impl Vec3 {
     pub fn mag(&self) -> f64 {
         self.mag_sqr().sqrt()
     }
+
+    /// Set the values of the vector such that the magnitude is 1.
+    pub fn norm(&self) -> Self {
+        *self / self.mag()
+    }
+
+    /// Calculate the cross product. If |A| and |B| are 1, the dot product is the Cosine of the angle between them.
+    pub fn dot(&self, rhs: &Vec3) -> f64 {
+        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
+    }
+
+    /// Calculate a vector perpendicular to the two given vectors.
+    pub fn cross(&self, rhs: &Vec3) -> Self {
+        Self {
+            x: self.y*rhs.z - rhs.y*self.z,
+            y: self.z*rhs.x - rhs.z*self.x,
+            z: self.x*rhs.y - rhs.x*self.y,
+        }
+    }
 }
 
 /// Negation trait for Vec3.
 impl Neg for Vec3 {
     type Output = Vec3;
     fn neg(self) -> Self::Output {
-        Vec3 { x: -self.x, y: -self.y, z: -self.z }
+        Self { x: -self.x, y: -self.y, z: -self.z }
     }
 }
 
@@ -43,7 +66,7 @@ impl AddAssign for Vec3 {
 impl Add for Vec3 {
     type Output = Vec3;
     fn add(self, rhs: Self) -> Self::Output {
-        Vec3 { x: self.x + rhs.x, y: self.y + rhs.y, z: self.z + rhs.z }
+        Self { x: self.x + rhs.x, y: self.y + rhs.y, z: self.z + rhs.z }
     }
 }
 
@@ -60,7 +83,7 @@ impl SubAssign for Vec3 {
 impl Sub for Vec3 {
     type Output = Vec3;
     fn sub(self, rhs: Self) -> Self::Output {
-        Vec3 { x: self.x - rhs.x, y: self.y - rhs.y, z: self.z - rhs.z }
+        Self { x: self.x - rhs.x, y: self.y - rhs.y, z: self.z - rhs.z }
     }
 }
 
@@ -77,7 +100,7 @@ impl MulAssign<f64> for Vec3 {
 impl Mul<f64> for Vec3 {
     type Output = Vec3;
     fn mul(self, rhs: f64) -> Self::Output {
-        Vec3 { x: self.x * rhs, y: self.y * rhs, z: self.z * rhs }
+        Self { x: self.x * rhs, y: self.y * rhs, z: self.z * rhs }
     }
 }
 
