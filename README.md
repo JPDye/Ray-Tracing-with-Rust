@@ -1,6 +1,13 @@
 # RTIOW-rust
 Rust implementation of the code found in the "Ray Tracing In One Weekend" book by Peter Shirley.
 
+<details><summary>Chapter 6</summary>
+  <p align="center">
+    <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/chapter6.jpg" />
+  </p>
+  <p>Camera struct created and multiple passes added to main loop for anti-aliasing.</p>
+</details>
+
 <details><summary>Chapter 5</summary>
   <p align="center">
     <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/chapter5.jpg" />
