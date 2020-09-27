@@ -1,7 +1,7 @@
 use std::fmt;
 
-use std::ops::{Add, AddAssign, Mul, MulAssign, Div, DivAssign};
 use std::cmp::PartialEq;
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign};
 
 /// Colour represents an RGB Colour with each field being an f64 between 0 and 1.
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -20,9 +20,13 @@ impl Colour {
 /// Print Colour as an RGB tuple with each field a U8 between 0 and 255.
 impl fmt::Display for Colour {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let ir = std::cmp::min((255.0 * self.r) as u32, 255);
-        let ig = std::cmp::min((255.0 * self.g) as u32, 255);
-        let ib = std::cmp::min((255.0 * self.b) as u32, 255);
+        let r = self.r.sqrt();
+        let g = self.g.sqrt();
+        let b = self.b.sqrt();
+
+        let ir = std::cmp::min((255.0 * r) as u8, 255);
+        let ig = std::cmp::min((255.0 * g) as u8, 255);
+        let ib = std::cmp::min((255.0 * b) as u8, 255);
 
         write!(f, "{} {} {}", ir, ig, ib)
     }
@@ -41,7 +45,11 @@ impl AddAssign for Colour {
 impl Add for Colour {
     type Output = Colour;
     fn add(self, rhs: Self) -> Self::Output {
-        Colour { r: self.r + rhs.r, g: self.g + rhs.g, b: self.b + rhs.b }
+        Colour {
+            r: self.r + rhs.r,
+            g: self.g + rhs.g,
+            b: self.b + rhs.b,
+        }
     }
 }
 
@@ -58,10 +66,13 @@ impl MulAssign<f64> for Colour {
 impl Mul<f64> for Colour {
     type Output = Colour;
     fn mul(self, rhs: f64) -> Self::Output {
-        Colour { r: self.r * rhs, g: self.g * rhs, b: self.b * rhs }
+        Colour {
+            r: self.r * rhs,
+            g: self.g * rhs,
+            b: self.b * rhs,
+        }
     }
 }
-
 
 /// Div Assign trait for Colour. Multiplies by inverse of RHs. Modifies LHS.
 impl DivAssign<f64> for Colour {
