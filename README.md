@@ -1,6 +1,14 @@
 # RTIOW-rust
 Rust implementation of the code found in the "Ray Tracing In One Weekend" book by Peter Shirley.
 
+
+<details><summary>Chapter 7</summary>
+  <p align="center">
+    <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/chapter7full.jpg" />
+  </p>
+  <p>Lambertian reflection added, Uniform Distribution used for randomness to improve speed.</p>
+</details>
+
 <details><summary>Chapter 6</summary>
   <p align="center">
     <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/chapter6.jpg" />
