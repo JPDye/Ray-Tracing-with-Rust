@@ -1,6 +1,9 @@
 mod hittable;
 use hittable::*;
 
+mod camera;
+use camera::*;
+
 mod sphere;
 use sphere::*;
 
@@ -12,6 +15,8 @@ use colour::*;
 
 mod ray;
 use ray::*;
+
+use rand::prelude::*;
 
 
 fn ray_colour(r: &Ray, world: &HittableList) -> Colour {
@@ -26,22 +31,21 @@ fn ray_colour(r: &Ray, world: &HittableList) -> Colour {
 
 
 fn main() {
-    // Image Settings
+    // Constants
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
     const IMAGE_WIDTH: u32 = 400;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
+    const NUM_SAMPLES: u32 = 25;
 
-    // Camera Settings
-    let viewport_height = 2.0;
-    let viewport_width = ASPECT_RATIO * viewport_height;
-    let focal_length = 1.0;
 
-    let origin = Vec3::new(0.0, 0.0, 0.0);
-    let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
-    let vertical = Vec3::new(0.0, viewport_height, 0.0);
-    let lower_left_corner = origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
+    // Initialise random number generator
+    let mut rng = rand::thread_rng();
 
-    // World
+    // Initialise camera
+    let camera = Camera::default();
+
+
+    // Initialise world
     let world = HittableList::new(
         vec![
         Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)),
@@ -50,17 +54,33 @@ fn main() {
 
 
     // Render
+
+    // Write header
     println!("P3\n {} {}\n255", IMAGE_WIDTH, IMAGE_HEIGHT);
 
+
+    // Loop over every row
     for j in (0..IMAGE_HEIGHT).rev() {
+        // Display progress
+        eprint!("\r{} rows completed!", IMAGE_HEIGHT - j);
+
+        // Loop over every column
         for i in 0..IMAGE_WIDTH {
-            let u = i as f64 / IMAGE_WIDTH as f64;
-            let v = j as f64 / IMAGE_HEIGHT as f64;
+            // Create colour for this pixel
+            let mut c = Colour::new(0.0, 0.0, 0.0);
 
-            let r = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v - origin);
-            let c = ray_colour(&r, &world);
+            // Loop for multiple samples of pixel
+            for _ in 0..NUM_SAMPLES {
+                // Create ray through pixel (with rng for aliasing)
+                let u = (i as f64 + rng.gen::<f64>()) / IMAGE_WIDTH as f64;
+                let v = (j as f64 + rng.gen::<f64>()) / IMAGE_HEIGHT as f64;
+                let r = camera.get_ray(u, v);
+                c += ray_colour(&r, &world);
+            }
 
-            println!("{}", c);
+            // Write pixel
+            println!("{}", c / NUM_SAMPLES as f64);
         }
     }
+    eprintln!("\nFinished!");
 }

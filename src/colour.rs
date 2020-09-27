@@ -20,9 +20,10 @@ impl Colour {
 /// Print Colour as an RGB tuple with each field a U8 between 0 and 255.
 impl fmt::Display for Colour {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let ir = (255.999 * self.r) as u8;
-        let ig = (255.999 * self.g) as u8;
-        let ib = (255.999 * self.b) as u8;
+        let ir = std::cmp::min((255.0 * self.r) as u32, 255);
+        let ig = std::cmp::min((255.0 * self.g) as u32, 255);
+        let ib = std::cmp::min((255.0 * self.b) as u32, 255);
+
         write!(f, "{} {} {}", ir, ig, ib)
     }
 }
