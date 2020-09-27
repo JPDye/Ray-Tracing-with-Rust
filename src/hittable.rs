@@ -1,11 +1,10 @@
-use crate::vec;
 use crate::ray;
+use crate::vec;
 
 /// All shapes have to implement the Hittable trait in order to calculate ray intersections.
 pub trait Hittable {
     fn hit(&self, r: &ray::Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
 }
-
 
 /// A HitRecord records a collosion between an object and a ray.
 pub struct HitRecord {
@@ -17,21 +16,25 @@ pub struct HitRecord {
 
 impl HitRecord {
     pub fn new(t: f64, p: vec::Vec3, norm: vec::Vec3, front_face: bool) -> Self {
-        Self { t, p, norm, front_face }
+        Self {
+            t,
+            p,
+            norm,
+            front_face,
+        }
     }
 }
 
 /// A HittableList stores a collection of HitRecords and has functionality for finding the closes hit to the camera.
 pub struct HittableList {
-    list: Vec<Box<dyn Hittable>>
+    list: Vec<Box<dyn Hittable>>,
 }
 
 impl HittableList {
-    pub fn new(list: Vec<Box<Hittable>>) -> Self {
+    pub fn new(list: Vec<Box<dyn Hittable>>) -> Self {
         HittableList { list }
     }
 }
-
 
 impl Hittable for HittableList {
     fn hit(&self, r: &ray::Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
@@ -44,6 +47,6 @@ impl Hittable for HittableList {
                 hit_obj = Some(hit);
             }
         }
-    hit_obj
+        hit_obj
     }
 }
