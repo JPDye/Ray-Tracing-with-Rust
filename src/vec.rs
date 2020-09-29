@@ -17,7 +17,6 @@ impl Vec3 {
         Self { x, y, z }
     }
 
-
     /// Create a Vec3 with each field (x, y, z) being a randomised f64. Distribution is from 0 to 1.
     pub fn random(distribution: &Uniform<f64>, rng_thread: &mut ThreadRng) -> Self {
         Self {

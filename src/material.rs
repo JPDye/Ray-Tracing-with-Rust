@@ -1,11 +1,10 @@
-use rand::distributions::{Uniform, Distribution};
+use rand::distributions::{Distribution, Uniform};
 use rand::rngs::ThreadRng;
 
 use crate::colour::Colour;
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
 use crate::vec::Vec3;
-
 
 /// Reflect an input vector V across the normal N.
 pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
@@ -30,7 +29,6 @@ fn schlick(cos: f64, ior: f64) -> f64 {
     let r0 = ((1.0 - ior) / (1.0 + ior)).powi(2);
     r0 + (1.0 - r0) * (1.0 - cos).powi(5)
 }
-
 
 pub trait Material {
     /// Given an input ray and a record of a collision, calculate the reflected ray and the Colour of the point.
@@ -119,19 +117,17 @@ impl Material for Dielectric {
         ray: &Ray,
         dist: &Uniform<f64>,
         rng: &mut ThreadRng,
-    ) -> Option<(Ray, Colour)>
-    {
+    ) -> Option<(Ray, Colour)> {
         let attenuation = Colour::new(1.0, 1.0, 1.0);
 
         let ni_over_nt = if rec.front_face {
             1.0 / self.ior
-        }  else {
+        } else {
             self.ior
         };
 
         let unit_direction = ray.direction.norm();
         let cos = (-unit_direction).dot(&rec.norm).min(1.0);
-
 
         // Match on whether or not refraction is possible given the ratio between ior's
         match refract(&unit_direction, &rec.norm, ni_over_nt) {
@@ -147,14 +143,14 @@ impl Material for Dielectric {
 
                 // Otherwise refract the ray
                 let scattered = Ray::new(rec.p, refracted);
-                return Some((scattered, attenuation));
+                Some((scattered, attenuation))
             }
 
             // Reflect the ray if no refraction is possible
             None => {
                 let reflected = reflect(&unit_direction, &rec.norm);
                 let scattered = Ray::new(rec.p, reflected);
-                return Some((scattered, attenuation));
+                Some((scattered, attenuation))
             }
         }
     }
