@@ -1,6 +1,9 @@
 mod hittable;
 use hittable::*;
 
+mod material;
+use material::*;
+
 mod camera;
 use camera::*;
 
@@ -26,25 +29,22 @@ fn ray_colour(
     rng: &mut ThreadRng,
     depth: u32,
 ) -> Colour {
-    if depth <= 0 {
-        return Colour::new(0.0, 0.0, 0.0);
-    }
 
     if let Some(hit) = world.hit(r, 0.001, f64::MAX) {
-        // let target = hit.p + hit.norm + Vec3::random_in_unit_sphere(dist, rng);  // lambert approx
-        let target = hit.p + hit.norm + Vec3::random_lambert(dist, rng); // true lambert
-        let new_ray = Ray::new(hit.p, target - hit.p);
-        let colour = ray_colour(&new_ray, world, dist, rng, depth - 1);
-        return colour * 0.5;
+        if depth > 0 {
+            if let Some((scattered, attenuation)) = hit.material.scatter(&hit, r, dist, rng) {
+                return attenuation * ray_colour(&scattered, world, dist, rng, depth - 1);
+            }
+        }
+        Colour::new(0.0, 0.0, 0.0)
     } else {
         let norm_dir = r.direction.norm();
         let t = 0.5 * (norm_dir.y + 1.0);
-        Colour::new(1.0, 1.0, 1.0) * (1.0 - t) + Colour::new(0.3, 0.5, 1.0) * t
+        return Colour::new(1.0, 1.0, 1.0) * (1.0 - t) + Colour::new(0.3, 0.5, 1.0) * t
     }
 }
 
 fn main() {
-    // -- Settings
     // Constants
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
     const IMAGE_WIDTH: u32 = 400;
@@ -52,19 +52,29 @@ fn main() {
     const NUM_SAMPLES: u32 = 100;
     const MAX_DEPTH: u32 = 50;
 
-    // -- Initialisation
-    // Initialise random number generator. Using uniform distribution for faster gen.
+    // RNG. Using uniform distribion for improved performance when generating lots of random numbers.
     let mut rng = rand::thread_rng();
     let dist = Uniform::from(0.0..1.0);
 
-    // Initialise camera
+    // Camera.
     let camera = Camera::default();
 
-    // Initialise world
+
+    // Materials
+    let mat_ground = Lambertian::new(Colour::new(0.8, 0.8, 0.0));
+    let mat_center = Lambertian::new(Colour::new(0.7, 0.3, 0.3));
+    let mat_right  = Metal::new(Colour::new(0.8, 0.6, 0.2), 1.0);
+    let mat_left   = Metal::new(Colour::new(0.8, 0.8, 0.8), 0.3);
+
+
+    // World
     let world = HittableList::new(vec![
-        Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)),
-        Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)),
+        Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, mat_ground)),
+        Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, mat_center)),
+        Box::new(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, mat_right)),
+        Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, mat_left)),
     ]);
+
 
     // -- Render
     // Write Header

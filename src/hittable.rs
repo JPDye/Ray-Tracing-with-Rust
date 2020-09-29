@@ -1,26 +1,29 @@
-use crate::ray;
-use crate::vec;
+use crate::material::Material;
+use crate::vec::Vec3;
+use crate::ray::Ray;
 
 /// All shapes have to implement the Hittable trait in order to calculate ray intersections.
 pub trait Hittable {
-    fn hit(&self, r: &ray::Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
 }
 
-/// A HitRecord records a collosion between an object and a ray.
-pub struct HitRecord {
+/// A HitRecord records a collision between an object and a ray.
+pub struct HitRecord<'a> {
     pub t: f64,
-    pub p: vec::Vec3,
-    pub norm: vec::Vec3,
+    pub p: Vec3,
+    pub norm: Vec3,
     pub front_face: bool,
+    pub material: &'a dyn Material,
 }
 
-impl HitRecord {
-    pub fn new(t: f64, p: vec::Vec3, norm: vec::Vec3, front_face: bool) -> Self {
+impl<'a> HitRecord<'a> {
+    pub fn new(t: f64, p: Vec3, norm: Vec3, front_face: bool, material: &'a dyn Material) -> Self {
         Self {
             t,
             p,
             norm,
             front_face,
+            material,
         }
     }
 }
@@ -37,7 +40,7 @@ impl HittableList {
 }
 
 impl Hittable for HittableList {
-    fn hit(&self, r: &ray::Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let mut hit_obj: Option<HitRecord> = None;
         let mut closest = t_max;
 

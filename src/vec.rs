@@ -17,6 +17,11 @@ impl Vec3 {
         Self { x, y, z }
     }
 
+    /// Reflect an input ray V across the normal N.
+    pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
+        *v - (*n * v.dot(&n) * 2.0)
+    }
+
     /// Create a Vec3 with each field (x, y, z) being a randomised f64. Distribution is from 0 to 1.
     #[allow(dead_code)]
     pub fn random(distribution: &Uniform<f64>, rng_thread: &mut ThreadRng) -> Self {
@@ -173,3 +178,5 @@ impl Div<f64> for Vec3 {
         self * (1.0 / rhs)
     }
 }
+
+
