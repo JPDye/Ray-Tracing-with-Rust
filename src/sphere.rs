@@ -1,5 +1,5 @@
-use crate::material::Material;
 use crate::hittable::{HitRecord, Hittable};
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec::Vec3;
 
@@ -12,7 +12,11 @@ pub struct Sphere<M: Material> {
 
 impl<M: Material> Sphere<M> {
     pub fn new(center: Vec3, radius: f64, material: M) -> Self {
-        Self { center, radius, material }
+        Self {
+            center,
+            radius,
+            material,
+        }
     }
 
     /// Create HitRecord for an intersection with a ray. Helper for Hittable trait.

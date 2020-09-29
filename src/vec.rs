@@ -17,13 +17,8 @@ impl Vec3 {
         Self { x, y, z }
     }
 
-    /// Reflect an input ray V across the normal N.
-    pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
-        *v - (*n * v.dot(&n) * 2.0)
-    }
 
     /// Create a Vec3 with each field (x, y, z) being a randomised f64. Distribution is from 0 to 1.
-    #[allow(dead_code)]
     pub fn random(distribution: &Uniform<f64>, rng_thread: &mut ThreadRng) -> Self {
         Self {
             x: (distribution.sample(rng_thread) - 0.5) * 2.0, // turn num from dist into -1..1 range
@@ -46,7 +41,6 @@ impl Vec3 {
     }
 
     /// Create a random Vec3 within a unit_sphere (for an approximation at lambertian reflection).
-    #[allow(dead_code)]
     pub fn random_in_unit_sphere(distribution: &Uniform<f64>, rng_thread: &mut ThreadRng) -> Self {
         loop {
             let p = Self::random(distribution, rng_thread);
@@ -178,5 +172,3 @@ impl Div<f64> for Vec3 {
         self * (1.0 / rhs)
     }
 }
-
-

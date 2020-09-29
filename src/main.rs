@@ -29,7 +29,6 @@ fn ray_colour(
     rng: &mut ThreadRng,
     depth: u32,
 ) -> Colour {
-
     if let Some(hit) = world.hit(r, 0.001, f64::MAX) {
         if depth > 0 {
             if let Some((scattered, attenuation)) = hit.material.scatter(&hit, r, dist, rng) {
@@ -40,16 +39,16 @@ fn ray_colour(
     } else {
         let norm_dir = r.direction.norm();
         let t = 0.5 * (norm_dir.y + 1.0);
-        return Colour::new(1.0, 1.0, 1.0) * (1.0 - t) + Colour::new(0.3, 0.5, 1.0) * t
+        return Colour::new(1.0, 1.0, 1.0) * (1.0 - t) + Colour::new(0.3, 0.5, 1.0) * t;
     }
 }
 
 fn main() {
     // Constants
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
-    const IMAGE_WIDTH: u32 = 400;
+    const IMAGE_WIDTH: u32 = 1920;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
-    const NUM_SAMPLES: u32 = 100;
+    const NUM_SAMPLES: u32 = 500;
     const MAX_DEPTH: u32 = 50;
 
     // RNG. Using uniform distribion for improved performance when generating lots of random numbers.
@@ -59,22 +58,19 @@ fn main() {
     // Camera.
     let camera = Camera::default();
 
-
     // Materials
-    let mat_ground = Lambertian::new(Colour::new(0.8, 0.8, 0.0));
-    let mat_center = Lambertian::new(Colour::new(0.7, 0.3, 0.3));
-    let mat_right  = Metal::new(Colour::new(0.8, 0.6, 0.2), 1.0);
-    let mat_left   = Metal::new(Colour::new(0.8, 0.8, 0.8), 0.3);
-
+    let grey_lambert = Lambertian::new(Colour::new(0.5, 0.5, 0.5));
+    let blue_lambert = Lambertian::new(Colour::new(0.1, 0.2, 0.5));
+    let gold_metal = Metal::new(Colour::new(0.8, 0.6, 0.2), 0.1);
+    let dielectric = Dielectric::new(1.5);
 
     // World
     let world = HittableList::new(vec![
-        Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, mat_ground)),
-        Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, mat_center)),
-        Box::new(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, mat_right)),
-        Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, mat_left)),
+        Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, grey_lambert)),
+        Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, blue_lambert)),
+        Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, dielectric)),
+        Box::new(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, gold_metal)),
     ]);
-
 
     // -- Render
     // Write Header
