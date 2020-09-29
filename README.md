@@ -1,6 +1,16 @@
 # RTIOW-rust
 Rust implementation of the code found in the "Ray Tracing In One Weekend" book by Peter Shirley.
 
+<details><summary>Chapter 9</summary>
+  <p align="center">
+    <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/chapter9.jpg" />
+  </p>
+  <p>Dielectric material struct created.</p>
+</details>
+
+
+
+
 <details><summary>Chapter 8</summary>
   <p align="center">
     <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/chapter8.jpg" />
