@@ -74,6 +74,18 @@ impl Mul<f64> for Colour {
     }
 }
 
+/// Multiplication (with another Colour. Creates new Colour.
+impl Mul<Colour> for Colour {
+    type Output = Colour;
+    fn mul(self, rhs: Colour) -> Self::Output {
+        Colour {
+            r: self.r * rhs.r,
+            g: self.g * rhs.g,
+            b: self.b * rhs.b,
+        }
+    }
+}
+
 /// Div Assign trait for Colour. Multiplies by inverse of RHs. Modifies LHS.
 impl DivAssign<f64> for Colour {
     fn div_assign(&mut self, rhs: f64) {
