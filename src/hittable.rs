@@ -1,6 +1,6 @@
 use crate::material::Material;
-use crate::vec::Vec3;
 use crate::ray::Ray;
+use crate::vec::Vec3;
 
 /// All shapes have to implement the Hittable trait in order to calculate ray intersections.
 pub trait Hittable {
