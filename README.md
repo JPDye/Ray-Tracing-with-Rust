@@ -3,7 +3,15 @@ Rust implementation of the code found in the "Ray Tracing In One Weekend" book b
 
 <details><summary>Chapter 10</summary>
   <p align="center">
-    <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/chapter=10.jpg" />
+    <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/chapter11.jpg" />
+  </p>
+  <p>Depth of field added.</p>
+</details>
+
+
+<details><summary>Chapter 10</summary>
+  <p align="center">
+    <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/chapter10.jpg" />
   </p>
   <p>Camera struct extended. Provide a point to look from, point to look at, up direction, vertical FOV and aspect ratio.</p>
 </details>
