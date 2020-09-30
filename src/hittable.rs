@@ -3,7 +3,7 @@ use crate::ray::Ray;
 use crate::vec::Vec3;
 
 /// All shapes have to implement the Hittable trait in order to calculate ray intersections.
-pub trait Hittable {
+pub trait Hittable: Sync {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
 }
 
@@ -34,8 +34,16 @@ pub struct HittableList {
 }
 
 impl HittableList {
-    pub fn new(list: Vec<Box<dyn Hittable>>) -> Self {
-        HittableList { list }
+    pub fn new() -> Self {
+        HittableList { list: Vec::new() }
+    }
+
+    pub fn from(list: Vec<Box<dyn Hittable>>) -> Self {
+        Self { list }
+    }
+
+    pub fn push(&mut self, item: Box<dyn Hittable>) {
+        self.list.push(item);
     }
 }
 
