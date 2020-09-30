@@ -3,7 +3,7 @@ Rust implementation of the code found in the "Ray Tracing In One Weekend" book b
 
 <details><summary>Chapter 12</summary>
   <p align="center">
-    <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/chapter11.jpg" />
+    <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/chapter12.jpg" />
   </p>
   <p>Rendering a randomised scene.</p>
 </details>
