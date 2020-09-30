@@ -30,7 +30,7 @@ fn schlick(cos: f64, ior: f64) -> f64 {
     r0 + (1.0 - r0) * (1.0 - cos).powi(5)
 }
 
-pub trait Material {
+pub trait Material: Sync {
     /// Given an input ray and a record of a collision, calculate the reflected ray and the Colour of the point.
     fn scatter(
         &self,
@@ -60,7 +60,7 @@ impl Material for Lambertian {
         dist: &Uniform<f64>,
         rng: &mut ThreadRng,
     ) -> Option<(Ray, Colour)> {
-        let scattered_ray = Ray::new(rec.p, rec.p + rec.norm + Vec3::random_lambert(dist, rng));
+        let scattered_ray = Ray::new(rec.p, rec.norm + Vec3::random_in_unit_sphere(dist, rng));
         Some((scattered_ray, self.albedo))
     }
 }
