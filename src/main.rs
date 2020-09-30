@@ -114,10 +114,10 @@ fn ray_colour(
 fn main() {
     // Constants
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
-    const IMAGE_WIDTH: u32 = 600;
+    const IMAGE_WIDTH: u32 = 1200;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
-    const NUM_SAMPLES: u32 = 100;
-    const MAX_DEPTH: u32 = 20;
+    const NUM_SAMPLES: u32 = 500;
+    const MAX_DEPTH: u32 = 50;
 
     // RNG. Using uniform distribion for improved performance when generating lots of random numbers.
 
@@ -149,56 +149,37 @@ fn main() {
     let world = random_scene();
 
     // Render
+    let image = (0..IMAGE_HEIGHT)
+        .into_par_iter()
+        .rev()
+        .flat_map(|j| {
+            let mut rng = rand::thread_rng();
+            let dist = Uniform::from(0.0..1.0);
 
-    let dist = Uniform::from(0.0..1.0);
-    let mut rng = rand::thread_rng();
+            (0..IMAGE_WIDTH)
+                .flat_map(|i| {
+                    let mut c = Colour::new(0.0, 0.0, 0.0);
 
+                    for _ in 0..NUM_SAMPLES {
+                        let u = (i as f64 + dist.sample(&mut rng)) / IMAGE_WIDTH as f64;
+                        let v = (j as f64 + dist.sample(&mut rng)) / IMAGE_HEIGHT as f64;
+                        let r = camera.get_ray(u, v, &dist, &mut rng);
+                        c += ray_colour(&r, &world, &dist, &mut rng, MAX_DEPTH);
+                    }
+
+                    vec![
+                        (255.999 * (c.r / NUM_SAMPLES as f64).sqrt().max(0.0).min(1.0)) as u8,
+                        (255.999 * (c.g / NUM_SAMPLES as f64).sqrt().max(0.0).min(1.0)) as u8,
+                        (255.999 * (c.b / NUM_SAMPLES as f64).sqrt().max(0.0).min(1.0)) as u8,
+                    ]
+                })
+                .collect::<Vec<u8>>()
+        })
+        .collect::<Vec<u8>>();
+
+    // Render
     println!("P3\n {} {}\n255", IMAGE_WIDTH, IMAGE_HEIGHT);
-    for j in (0..IMAGE_HEIGHT).rev() {
-        eprint!("\r{} rows completed!", IMAGE_HEIGHT - j);
-
-        for i in 0..IMAGE_WIDTH {
-            let mut c = Colour::new(0.0, 0.0, 0.0);
-
-            for _ in 0..NUM_SAMPLES {
-                let u = (i as f64 + dist.sample(&mut rng)) / IMAGE_WIDTH as f64;
-                let v = (j as f64 + dist.sample(&mut rng)) / IMAGE_HEIGHT as f64;
-                let r = camera.get_ray(u, v, &dist, &mut rng);
-                c += ray_colour(&r, &world, &dist, &mut rng, MAX_DEPTH);
-            }
-
-            println!("{}", c / NUM_SAMPLES as f64);
-        }
+    for colour in image.chunks(3) {
+        println!("{} {} {}", colour[0], colour[1], colour[2]);
     }
-    eprintln!("\nFinished!");
-
-    //let image =
-    //(0..IMAGE_HEIGHT).into_par_iter().rev()
-    //.flat_map(|j| {
-    //let mut rng = rand::thread_rng();
-    //let dist = Uniform::from(0.0..1.0);
-
-    //(0..IMAGE_WIDTH).flat_map(|i| {
-    //let mut c = Colour::new(0.0, 0.0, 0.0);
-
-    //for _ in 0..NUM_SAMPLES {
-    //let u = (i as f64 + dist.sample(&mut rng)) / IMAGE_WIDTH as f64;
-    //let v = (j as f64 + dist.sample(&mut rng)) / IMAGE_HEIGHT as f64;
-    //let r = camera.get_ray(u, v, &dist, &mut rng);
-    //c += ray_colour(&r, &world, &dist, &mut rng, MAX_DEPTH);
-    //}
-
-    //vec![
-    //(255.999 * (c.r / NUM_SAMPLES as f64).sqrt().max(0.0).min(1.0)) as u8,
-    //(255.999 * (c.g / NUM_SAMPLES as f64).sqrt().max(0.0).min(1.0)) as u8,
-    //(255.999 * (c.b / NUM_SAMPLES as f64).sqrt().max(0.0).min(1.0)) as u8,
-    //]
-    //}).collect::<Vec<u8>>()
-    //}).collect::<Vec<u8>>();
-
-    //println!("P3\n {} {}\n255", IMAGE_WIDTH, IMAGE_HEIGHT);
-
-    //for colour in image.chunks(3) {
-    //println!("{} {} {}", colour[0], colour[1], colour[2]);
-    //}
 }
