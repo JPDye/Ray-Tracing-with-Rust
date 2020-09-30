@@ -1,13 +1,19 @@
 # RTIOW-rust
 Rust implementation of the code found in the "Ray Tracing In One Weekend" book by Peter Shirley.
 
+<details><summary>Chapter 13</summary>
+  <p align="center">
+    <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/chapter13.jpg" />
+  </p>
+  <p>Concurrency with Rayon. Reduced final image render time for 60+ minutes to 8 minutes.</p>
+</details>
+
 <details><summary>Chapter 12</summary>
   <p align="center">
     <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/chapter12.jpg" />
   </p>
   <p>Rendering a randomised scene.</p>
 </details>
-
 
 <details><summary>Chapter 11</summary>
   <p align="center">
