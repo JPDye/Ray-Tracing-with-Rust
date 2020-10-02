@@ -1,22 +1,19 @@
-# RTIOW-rust
-Rust implementation of the code found in the "Ray Tracing In One Weekend" book by Peter Shirley.
+# Ray Tracing with Rust
+Rust implementation of the code found in the Ray Tracing series by Peter Shirley. I am using the code of <a href="https://github.com/fralken">fralken</a> and <a href="https://github.com/cbiffle/rtiow-rust">cbiffle</a> as a guide for writing idiomatic Rust.
 
 <p align="center">
-  <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/test.jpg" />
+  <img src="https://github.com/JPDye/Ray-Tracing-with-Rust/blob/master/img/test.jpg" />
 </p>
 
 <p align="center">
-  <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/final(1).jpg" />
+  <img src="https://github.com/JPDye/Ray-Tracing-with-Rust/blob/master/img/final(1).jpg" />
 </p>
 
-
-
-## Next Steps
-- Change Colour and Vec3 structs for the nalgebra Vector3<f64> type. Will simplify code and provide performance boost.
-- Add shadows by casting shadow rays in the ray_colour function.
-- Add a BVH to improve performance.
 
 ## Progress
+### Book 2
+
+### Book 1
 <details><summary>Chapter 13</summary>
   <p align="center">
     <img src="https://github.com/JPDye/RTIOW-rust/blob/master/img/chapter13.jpg" />
