@@ -112,6 +112,18 @@ impl Add for Vec3 {
     }
 }
 
+/// Addition with an f64 trait.
+impl Add<f64> for Vec3 {
+    type Output = Vec3;
+    fn add(self, rhs: f64) -> Self::Output {
+        Self {
+            x: self.x + rhs,
+            y: self.y + rhs,
+            z: self.z + rhs,
+        }
+    }
+}
+
 /// Sub Assign trait for Vec. Modifies LHS.
 impl SubAssign for Vec3 {
     fn sub_assign(&mut self, rhs: Self) {

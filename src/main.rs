@@ -13,6 +13,9 @@ use material::*;
 mod camera;
 use camera::*;
 
+mod moving_sphere;
+use moving_sphere::*;
+
 mod sphere;
 use sphere::*;
 
@@ -53,8 +56,11 @@ fn random_scene() -> HittableList {
                         rng.gen::<f64>() * rng.gen::<f64>(),
                         rng.gen::<f64>() * rng.gen::<f64>(),
                     );
+
+                    let center2 = center + Vec3::new(0.0, rng.gen_range(0.0, 0.5), 0.0);
+
                     let sphere_mat = Lambertian::new(albedo);
-                    world.push(Box::new(Sphere::new(center, 0.2, sphere_mat)));
+                    world.push(Box::new(MovingSphere::new(center, center2, 0.0, 1.0, 0.2, sphere_mat)));
                 } else if choose_material < 0.95 {
                     // Metal
                     let fuzz = rng.gen_range(0.0, 0.5);
@@ -128,6 +134,8 @@ fn main() {
     let vfov = 20.0;
     let aperture = 0.1;
     let focus_dist = 10.0;
+    let time0 = 0.0;
+    let time1 = 1.0;
 
     let camera = Camera::new(
         look_from,
@@ -137,6 +145,8 @@ fn main() {
         ASPECT_RATIO,
         aperture,
         focus_dist,
+        time0,
+        time1,
     );
 
     // Materials.
@@ -163,7 +173,7 @@ fn main() {
                     for _ in 0..NUM_SAMPLES {
                         let u = (i as f64 + dist.sample(&mut rng)) / IMAGE_WIDTH as f64;
                         let v = (j as f64 + dist.sample(&mut rng)) / IMAGE_HEIGHT as f64;
-                        let r = camera.get_ray(u, v, &dist, &mut rng);
+                        let r = camera.get_ray(u, v, &mut rng);
                         c += ray_colour(&r, &world, &dist, &mut rng, MAX_DEPTH);
                     }
 
