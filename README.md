@@ -8,6 +8,13 @@ Rust implementation of the code found in the Ray Tracing series by Peter Shirley
 
 ## Progress
 ### Book 2
+<details><summary>Chapter 1</summary>
+  <p align="center">
+    <img src="https://github.com/JPDye/Ray-Tracing-with-Rust/blob/master/img/book2_chapter1.jpg" />
+  </p>
+  <p>Motion blur.</p>
+</details>
+
 
 ### Book 1
 <details><summary>Chapter 13</summary>
