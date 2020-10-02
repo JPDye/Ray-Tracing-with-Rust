@@ -56,11 +56,11 @@ impl Material for Lambertian {
     fn scatter(
         &self,
         rec: &HitRecord,
-        _ray: &Ray,
+        ray: &Ray,
         dist: &Uniform<f64>,
         rng: &mut ThreadRng,
     ) -> Option<(Ray, Colour)> {
-        let scattered_ray = Ray::new(rec.p, rec.norm + Vec3::random_in_unit_sphere(dist, rng));
+        let scattered_ray = Ray::new(rec.p, rec.norm + Vec3::random_in_unit_sphere(dist, rng), ray.time);
         Some((scattered_ray, self.albedo))
     }
 }
@@ -91,6 +91,7 @@ impl Material for Metal {
             let scattered_ray = Ray::new(
                 rec.p,
                 reflected_ray + Vec3::random_in_unit_sphere(dist, rng) * self.fuzz,
+                ray.time,
             );
             Some((scattered_ray, self.albedo))
         } else {
@@ -137,19 +138,19 @@ impl Material for Dielectric {
                 let reflect_prob = schlick(cos, ni_over_nt);
                 if dist.sample(rng) < reflect_prob {
                     let reflected = reflect(&unit_direction, &rec.norm);
-                    let scattered = Ray::new(rec.p, reflected);
+                    let scattered = Ray::new(rec.p, reflected, ray.time);
                     return Some((scattered, attenuation));
                 }
 
                 // Otherwise refract the ray
-                let scattered = Ray::new(rec.p, refracted);
+                let scattered = Ray::new(rec.p, refracted, ray.time);
                 Some((scattered, attenuation))
             }
 
             // Reflect the ray if no refraction is possible
             None => {
                 let reflected = reflect(&unit_direction, &rec.norm);
-                let scattered = Ray::new(rec.p, reflected);
+                let scattered = Ray::new(rec.p, reflected, ray.time);
                 Some((scattered, attenuation))
             }
         }

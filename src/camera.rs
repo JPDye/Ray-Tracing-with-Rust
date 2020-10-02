@@ -30,6 +30,7 @@ pub struct Camera {
     w: Vec3,
     v: Vec3,
     lens_radius: f64,
+    dist: Uniform<f64>,
 }
 
 impl Camera {
@@ -41,6 +42,8 @@ impl Camera {
         aspect_ratio: f64,
         aperture: f64,
         focus_dist: f64,
+        time0: f64,
+        time1: f64,
     ) -> Self {
         let theta = deg_to_rad(vfov);
         let h = (theta / 2.0).tan();
@@ -58,6 +61,8 @@ impl Camera {
 
         let lens_radius = aperture / 2.0;
 
+        let dist = Uniform::from(time0..time1);
+
         Self {
             origin,
             vertical,
@@ -67,16 +72,19 @@ impl Camera {
             w,
             v,
             lens_radius,
+            dist,
         }
     }
 
-    pub fn get_ray(&self, s: f64, t: f64, dist: &Uniform<f64>, rng: &mut ThreadRng) -> Ray {
-        let rd = random_in_unit_disk(dist, rng) * self.lens_radius;
+    pub fn get_ray(&self, s: f64, t: f64, rng: &mut ThreadRng) -> Ray {
+        let rd = random_in_unit_disk(&self.dist, rng) * self.lens_radius;
         let offset = self.u * rd.x + self.v * rd.y;
+        let time = self.dist.sample(rng);
 
         Ray::new(
             self.origin + offset,
             self.lower_left_corner + self.horizontal * s + self.vertical * t - self.origin - offset,
+            time,
         )
     }
 }
