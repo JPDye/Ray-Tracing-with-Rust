@@ -11,17 +11,17 @@ pub trait Hittable: Sync {
 pub struct HitRecord<'a> {
     pub t: f64,
     pub p: Vec3,
-    pub norm: Vec3,
+    pub normal: Vec3,
     pub front_face: bool,
     pub material: &'a dyn Material,
 }
 
 impl<'a> HitRecord<'a> {
-    pub fn new(t: f64, p: Vec3, norm: Vec3, front_face: bool, material: &'a dyn Material) -> Self {
+    pub fn new(t: f64, p: Vec3, normal: Vec3, front_face: bool, material: &'a dyn Material) -> Self {
         Self {
             t,
             p,
-            norm,
+            normal,
             front_face,
             material,
         }

@@ -13,8 +13,14 @@ use material::*;
 mod camera;
 use camera::*;
 
+mod aabb;
+use aabb::*;
+
 mod moving_sphere;
 use moving_sphere::*;
+
+mod colour;
+use colour::*;
 
 mod sphere;
 use sphere::*;
@@ -22,8 +28,6 @@ use sphere::*;
 mod vec;
 use vec::*;
 
-mod colour;
-use colour::*;
 
 mod ray;
 use ray::*;
@@ -34,7 +38,7 @@ fn random_scene() -> HittableList {
 
     let ground = Lambertian::new(Colour::new(0.5, 0.5, 0.5));
     world.push(Box::new(Sphere::new(
-        Vec3::new(0.0, -1000.0, 0.0),
+        Vec3(0.0, -1000.0, 0.0),
         1000.0,
         ground,
     )));
@@ -42,13 +46,13 @@ fn random_scene() -> HittableList {
     for a in -11..11 {
         for b in -11..11 {
             let choose_material = rng.gen::<f64>();
-            let center = Vec3::new(
+            let center = Vec3(
                 a as f64 + 0.9 * rng.gen::<f64>(),
                 0.2,
                 b as f64 + 0.9 * rng.gen::<f64>(),
             );
 
-            if (center - Vec3::new(4.0, 0.2, 0.0)).mag() > 0.9 {
+            if (center - Vec3(4.0, 0.2, 0.0)).mag() > 0.9 {
                 if choose_material < 0.8 {
                     // Diffuse
                     let albedo = Colour::new(
@@ -57,7 +61,7 @@ fn random_scene() -> HittableList {
                         rng.gen::<f64>() * rng.gen::<f64>(),
                     );
 
-                    let center2 = center + Vec3::new(0.0, rng.gen_range(0.0, 0.5), 0.0);
+                    let center2 = center + Vec3(0.0, rng.gen_range(0.0, 0.5), 0.0);
 
                     let sphere_mat = Lambertian::new(albedo);
                     world.push(Box::new(MovingSphere::new(center, center2, 0.0, 1.0, 0.2, sphere_mat)));
@@ -81,17 +85,17 @@ fn random_scene() -> HittableList {
     }
 
     let glass = Dielectric::new(1.5);
-    world.push(Box::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, glass)));
+    world.push(Box::new(Sphere::new(Vec3(0.0, 1.0, 0.0), 1.0, glass)));
 
     let lambert = Lambertian::new(Colour::new(0.4, 0.2, 0.1));
     world.push(Box::new(Sphere::new(
-        Vec3::new(-4.0, 1.0, 0.0),
+        Vec3(-4.0, 1.0, 0.0),
         1.0,
         lambert,
     )));
 
     let metal = Metal::new(Colour::new(0.7, 0.6, 0.5), 0.0);
-    world.push(Box::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, metal)));
+    world.push(Box::new(Sphere::new(Vec3(4.0, 1.0, 0.0), 1.0, metal)));
 
     world
 }
@@ -111,8 +115,8 @@ fn ray_colour(
         }
         Colour::new(0.0, 0.0, 0.0)
     } else {
-        let norm_dir = r.direction.norm();
-        let t = 0.5 * (norm_dir.y + 1.0);
+        let norm_dir = r.direction.normalise();
+        let t = 0.5 * (norm_dir.1 + 1.0);
         return Colour::new(1.0, 1.0, 1.0) * (1.0 - t) + Colour::new(0.3, 0.5, 1.0) * t;
     }
 }
@@ -120,17 +124,17 @@ fn ray_colour(
 fn main() {
     // Constants
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
-    const IMAGE_WIDTH: u32 = 1200;
+    const IMAGE_WIDTH: u32 = 400;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
-    const NUM_SAMPLES: u32 = 500;
-    const MAX_DEPTH: u32 = 50;
+    const NUM_SAMPLES: u32 = 100;
+    const MAX_DEPTH: u32 = 30;
 
     // RNG. Using uniform distribion for improved performance when generating lots of random numbers.
 
     // Camera.
-    let look_from = Vec3::new(13.0, 2.0, 3.0);
-    let look_at = Vec3::new(0.0, 0.0, 0.0);
-    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let look_from = Vec3(13.0, 2.0, 3.0);
+    let look_at = Vec3(0.0, 0.0, 0.0);
+    let vup = Vec3(0.0, 1.0, 0.0);
     let vfov = 20.0;
     let aperture = 0.1;
     let focus_dist = 10.0;
@@ -148,12 +152,6 @@ fn main() {
         time0,
         time1,
     );
-
-    // Materials.
-    //let grey = Lambertian::new(Colour::new(0.4, 0.4, 0.4));
-    //let blue = Lambertian::new(Colour::new(0.1, 0.2, 0.5));
-    //let glass = Dielectric::new(1.5);
-    //let gold = Metal::new(Colour::new(0.8, 0.6, 0.2), 0.3);
 
     // World.
     let world = random_scene();

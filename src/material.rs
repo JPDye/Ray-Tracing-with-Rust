@@ -4,25 +4,8 @@ use rand::rngs::ThreadRng;
 use crate::colour::Colour;
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
-use crate::vec::Vec3;
+use crate::vec::{Vec3, reflect, refract};
 
-/// Reflect an input vector V across the normal N.
-pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
-    *v - (*n * v.dot(&n) * 2.0)
-}
-
-/// Refraction
-fn refract(v: &Vec3, n: &Vec3, ni_over_nt: f64) -> Option<Vec3> {
-    let uv = v.norm();
-    let dt = uv.dot(&n);
-    let discriminant = 1.0 - ni_over_nt.powi(2) * (1.0 - dt.powi(2));
-    if discriminant > 0.0 {
-        let refracted = (uv - *n * dt) * ni_over_nt - *n * discriminant.sqrt();
-        Some(refracted)
-    } else {
-        None
-    }
-}
 
 /// Schlick's approximation
 fn schlick(cos: f64, ior: f64) -> f64 {
@@ -41,6 +24,7 @@ pub trait Material: Sync {
     ) -> Option<(Ray, Colour)>;
 }
 
+/// Lambertian materials a diffuse. For this program, they reflect 50% of light.
 #[derive(Debug, Clone, Copy)]
 pub struct Lambertian {
     albedo: Colour,
@@ -60,11 +44,13 @@ impl Material for Lambertian {
         dist: &Uniform<f64>,
         rng: &mut ThreadRng,
     ) -> Option<(Ray, Colour)> {
-        let scattered_ray = Ray::new(rec.p, rec.norm + Vec3::random_in_unit_sphere(dist, rng), ray.time);
+        let scattered_ray = Ray::new(rec.p, rec.normal + Vec3::random_in_unit_sphere(dist, rng), ray.time);
         Some((scattered_ray, self.albedo))
     }
 }
 
+
+/// Metallic materials are reflective. They have a colour and a 'fuzz' value, determining how crisp the reflections are.
 #[derive(Debug, Clone, Copy)]
 pub struct Metal {
     albedo: Colour,
@@ -85,9 +71,9 @@ impl Material for Metal {
         dist: &Uniform<f64>,
         rng: &mut ThreadRng,
     ) -> Option<(Ray, Colour)> {
-        let reflected_ray = reflect(&ray.direction.norm(), &rec.norm);
+        let reflected_ray = reflect(ray.direction.normalise(), rec.normal);
 
-        if reflected_ray.dot(&rec.norm) > 0.0 {
+        if reflected_ray.dot(rec.normal) > 0.0 {
             let scattered_ray = Ray::new(
                 rec.p,
                 reflected_ray + Vec3::random_in_unit_sphere(dist, rng) * self.fuzz,
@@ -100,6 +86,7 @@ impl Material for Metal {
     }
 }
 
+/// Dielectric materials are transparent. Given an IOR they will refract light, or reflect it where applicable.
 #[derive(Debug, Clone, Copy)]
 pub struct Dielectric {
     ior: f64,
@@ -127,17 +114,17 @@ impl Material for Dielectric {
             self.ior
         };
 
-        let unit_direction = ray.direction.norm();
-        let cos = (-unit_direction).dot(&rec.norm).min(1.0);
+        let unit_direction = ray.direction.normalise();
+        let cos = (-unit_direction).dot(rec.normal).min(1.0);
 
         // Match on whether or not refraction is possible given the ratio between ior's
-        match refract(&unit_direction, &rec.norm, ni_over_nt) {
+        match refract(unit_direction, rec.normal, ni_over_nt) {
             // If refraction is possible, use Shclick's approximation to choose between reflection and refraction
             Some(refracted) => {
                 // If Shlick's approximation says reflection is highly likely, use Uniform dist decide whether to reflect
                 let reflect_prob = schlick(cos, ni_over_nt);
                 if dist.sample(rng) < reflect_prob {
-                    let reflected = reflect(&unit_direction, &rec.norm);
+                    let reflected = reflect(unit_direction, rec.normal);
                     let scattered = Ray::new(rec.p, reflected, ray.time);
                     return Some((scattered, attenuation));
                 }
@@ -149,7 +136,7 @@ impl Material for Dielectric {
 
             // Reflect the ray if no refraction is possible
             None => {
-                let reflected = reflect(&unit_direction, &rec.norm);
+                let reflected = reflect(unit_direction, rec.normal);
                 let scattered = Ray::new(rec.p, reflected, ray.time);
                 Some((scattered, attenuation))
             }

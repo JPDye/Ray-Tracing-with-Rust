@@ -24,7 +24,7 @@ impl<M: Material> Sphere<M> {
         let p = r.point_at(t);
 
         let outward_norm = (p - self.center) / self.radius;
-        let mut front_face = r.direction.dot(&outward_norm) > 0.0;
+        let mut front_face = r.direction.dot(outward_norm) > 0.0;
         let norm: Vec3;
 
         if front_face {
@@ -45,7 +45,7 @@ impl<M: Material> Hittable for Sphere<M> {
 
         // Calculate discriminant
         let a = r.direction.mag_sqr();
-        let half_b = oc.dot(&r.direction);
+        let half_b = oc.dot(r.direction);
         let c = oc.mag_sqr() - self.radius * self.radius;
         let discriminant = half_b * half_b - a * c;
 
