@@ -1,3 +1,7 @@
+use std::ops::Range;
+
+use crate::aabb::AABB;
+
 use crate::hittable::{HitRecord, Hittable};
 use crate::material::Material;
 use crate::ray::Ray;
@@ -67,5 +71,13 @@ impl<M: Material> Hittable for Sphere<M> {
         }
         // Return if no roots
         None
+    }
+
+    fn bounding_box(&self, time_range: &Range<f64>) -> Option<AABB> {
+        let aabb = AABB {
+            min: self.center - Vec3::from(self.radius),
+            max: self.center + Vec3::from(self.radius),
+        };
+        Some(aabb)
     }
 }

@@ -1,7 +1,5 @@
+use rand::distributions::{Distribution, Standard, Uniform};
 use rand::prelude::*;
-use rand::distributions::{Distribution, Uniform};
-
-pub type Colour = Vec3;
 
 #[derive(Copy, Clone, Default, Debug)]
 pub struct Vec3(pub f64, pub f64, pub f64);
@@ -11,7 +9,8 @@ impl Vec3 {
     /// Uniform<f64> must be for range 0..1
     pub fn random_in_unit_sphere(dist: &Uniform<f64>, rng: &mut impl Rng) -> Self {
         loop {
-            let v = 2.0 * Vec3(dist.sample(rng), dist.sample(rng), dist.sample(rng)) - Vec3::from(1.0);
+            let v =
+                2.0 * Vec3(dist.sample(rng), dist.sample(rng), dist.sample(rng)) - Vec3::from(1.0);
             if v.mag_sqr() < 1.0 {
                 return v;
             }
@@ -39,7 +38,7 @@ impl Vec3 {
         Self(
             self.1 * other.2 - self.2 * other.1,
             self.2 * other.0 - self.0 * other.2,
-            self.0 * other.1 - self.1 * other.0
+            self.0 * other.1 - self.1 * other.0,
         )
     }
 
@@ -54,7 +53,6 @@ impl Vec3 {
     pub fn mag(&self) -> f64 {
         self.dot(*self).sqrt()
     }
-
 
     /// Calculate a vector pointing in the same direction as 'self' but with a length equal to 1.
     #[inline]
@@ -72,6 +70,20 @@ impl Vec3 {
     #[inline]
     pub fn zip_with(self, other: Vec3, mut f: impl FnMut(f64, f64) -> f64) -> Self {
         Self(f(self.0, other.0), f(self.1, other.1), f(self.2, other.2))
+    }
+
+    #[inline]
+    pub fn zip_with3(
+        self,
+        other1: Vec3,
+        other2: Vec3,
+        mut f: impl FnMut(f64, f64, f64) -> f64,
+    ) -> Self {
+        Self(
+            f(self.0, other1.0, other2.0),
+            f(self.1, other1.1, other2.1),
+            f(self.2, other1.2, other2.2),
+        )
     }
 
     /// Combines the elements of 'self' with 'f' until only one result remains.
@@ -101,7 +113,6 @@ impl std::ops::Mul<Vec3> for f64 {
     }
 }
 
-
 /// vector * f64
 impl std::ops::Mul<f64> for Vec3 {
     type Output = Vec3;
@@ -111,7 +122,6 @@ impl std::ops::Mul<f64> for Vec3 {
         rhs * self
     }
 }
-
 
 /// vector / vector
 impl std::ops::Div for Vec3 {
@@ -139,7 +149,7 @@ impl std::ops::Add for Vec3 {
 
     #[inline]
     fn add(self, rhs: Vec3) -> Self::Output {
-        self.zip_with(rhs,std::ops::Add::add)
+        self.zip_with(rhs, std::ops::Add::add)
     }
 }
 
@@ -182,7 +192,6 @@ impl std::ops::Neg for Vec3 {
         self.map(std::ops::Neg::neg)
     }
 }
-
 
 /// Create a vector from a single value. Sets all channels to the value.
 impl From<f64> for Vec3 {
@@ -232,6 +241,16 @@ impl ::std::ops::IndexMut<Channel> for Vec3 {
     }
 }
 
+impl Distribution<Channel> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Channel {
+        match rng.gen_range(0, 3) {
+            0 => R,
+            1 => G,
+            _ => B,
+        }
+    }
+}
+
 /// Names for vector components when used as a co-ordinate. Allows indexing by Axis.
 /// let v = Vec3(1.0, 2.0, 3.0)
 /// assert_eq!(v[X], 1.0)
@@ -271,6 +290,15 @@ impl ::std::ops::IndexMut<Axis> for Vec3 {
     }
 }
 
+impl Distribution<Axis> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Axis {
+        match rng.gen_range(0, 3) {
+            0 => X,
+            1 => Y,
+            _ => Z,
+        }
+    }
+}
 
 /// Reflect Vector3 'v' across a surface normal 'n'.
 #[inline]
@@ -293,22 +321,3 @@ pub fn refract(v: Vec3, n: Vec3, ni_over_nt: f64) -> Option<Vec3> {
         None
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
