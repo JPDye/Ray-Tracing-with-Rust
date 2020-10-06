@@ -45,8 +45,8 @@ fn random_scene() -> HittableList {
         ground,
     )));
 
-    for a in -11..11 {
-        for b in -11..11 {
+    for a in -50..50 {
+        for b in -50..50 {
             let choose_material = rng.gen::<f64>();
             let center = Vec3(
                 a as f64 + 0.9 * rng.gen::<f64>(),
@@ -102,7 +102,7 @@ fn random_scene() -> HittableList {
 
 fn ray_colour(
     r: &Ray,
-    world: &BVHNode,
+    world: &Box<dyn Hittable>,
     dist: &Uniform<f64>,
     rng: &mut ThreadRng,
     depth: u32,
@@ -124,10 +124,10 @@ fn ray_colour(
 fn main() {
     // Constants
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
-    const IMAGE_WIDTH: u32 = 400;
+    const IMAGE_WIDTH: u32 = 100;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
-    const NUM_SAMPLES: u32 = 100;
-    const MAX_DEPTH: u32 = 20;
+    const NUM_SAMPLES: u32 = 50;
+    const MAX_DEPTH: u32 = 10;
 
     // RNG. Using uniform distribion for improved performance when generating lots of random numbers.
 
@@ -154,10 +154,13 @@ fn main() {
     );
 
     // World.
-    eprintln!("Building BVH");
-    let mut world = random_scene();
-    let world = BVHNode::new(&mut world.list, 0.0, 1.0);
-    eprintln!("Done!");
+    let world = random_scene();
+
+    let world = Box::new(world) as Box<dyn Hittable>;
+
+    //eprintln!("Building BVH");
+    //let world = Box::new(BVH::new(world.list, 0.0, 1.0)) as Box<dyn Hittable>;
+    //eprintln!("Done!");
 
     // Render
     let image = (0..IMAGE_HEIGHT)

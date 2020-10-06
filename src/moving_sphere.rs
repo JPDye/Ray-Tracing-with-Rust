@@ -36,8 +36,7 @@ impl<M: Material> MovingSphere<M> {
 
     /// Return the center of the sphere at a specific point in time.
     pub fn center(&self, time: f64) -> Vec3 {
-        self.center0
-            + (self.center1 - self.center0) * ((time - self.time0) / (self.time1 - self.time0))
+        self.center0 + ((time - self.time0) / (self.time1 - self.time0)) * (self.center1 - self.center0)
     }
 
     /// Create HitRecord for an intersection with a ray. Helper for Hittable trait.

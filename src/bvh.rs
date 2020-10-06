@@ -4,86 +4,98 @@ use crate::aabb::AABB;
 use crate::hittable::{HitRecord, Hittable};
 
 use crate::ray::Ray;
-use crate::vec::Axis;
+use crate::vec::Axis::{self, *};
 
-pub struct BVHNode {
-    left: Box<dyn Hittable>,
-    right: Box<dyn Hittable>,
+pub enum BVHNode {
+    Branch { left: Box<BVH>, right: Box<BVH> },
+    Leaf(Box<dyn Hittable>)
+}
+
+pub struct BVH {
+    tree: BVHNode,
     bbox: AABB,
 }
 
-impl BVHNode {
-    pub fn new(hittables: &mut Vec<Box<dyn Hittable>>, t0: f64, t1: f64) -> Self {
+impl BVH {
+    pub fn new(mut hittables: Vec<Box<dyn Hittable>>, t0: f64, t1: f64) -> Self {
         fn box_compare(
             axis: Axis,
             t0: f64,
             t1: f64,
-        ) -> impl FnMut(&Box<dyn Hittable>, &Box<dyn Hittable>) -> Ordering {
+        ) -> impl FnMut(&Box<dyn Hittable>, &Box<dyn Hittable>) ->  Ordering {
             move |a, b| {
                 let a_bbox = a.bounding_box(t0, t1);
                 let b_bbox = b.bounding_box(t0, t1);
 
-                if a_bbox.is_none() || b_bbox.is_none() {
-                    panic!("no bounding box in bvh node");
-                }
-
-                if a_bbox.unwrap().min[axis] - b_bbox.unwrap().min[axis] < 0.0 {
-                    Ordering::Less
+                if let (Some(a), Some(b)) = (a_bbox, b_bbox) {
+                    let ac = a.min[axis] + a.max[axis];
+                    let bc = b.min[axis] + b.max[axis];
+                    ac.partial_cmp(&bc).unwrap()
                 } else {
-                    Ordering::Greater
+                    panic!("no bounding box in bvh node");
                 }
             }
         }
 
-        let axis = rand::random::<Axis>();
+        fn axis_range(hittables: &Vec<Box<dyn Hittable>>, t0: f64, t1: f64, axis: Axis) -> f64 {
+            let (min, max) = hittables.iter().fold((std::f64::MAX, std::f64::MIN), |(bmin, bmax), hit| {
+                if let Some(aabb) = hit.bounding_box(t0, t1) {
+                    (bmin.min(aabb.min[axis]), bmax.max(aabb.max[axis]))
+                } else {
+                    (bmin, bmax)
+                }
+            });
+            max - min
+        }
+
+        let mut axis_ranges: Vec<(Axis, f64)> = Vec::new();
+        axis_ranges.push((X, axis_range(&hittables, t0, t1, X)));
+        axis_ranges.push((Y, axis_range(&hittables, t0, t1, Y)));
+        axis_ranges.push((Z, axis_range(&hittables, t0, t1, Z)));
+        axis_ranges.sort_unstable_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+
+        let axis = axis_ranges[0].0;
         hittables.sort_unstable_by(box_compare(axis, t0, t1));
 
         let len = hittables.len();
         match len {
             0 => panic!("no elements in scene"),
             1 => {
-                let hittable = hittables.pop().unwrap();
-                if let Some(bbox) = hittable.bounding_box(t0, t1) {
-                    BVHNode {
-                        left: hittable,
-                        right: hittable,
-                        bbox
-                    }
+                let leaf = hittables.pop().unwrap();
+                if let Some(bbox) = leaf.bounding_box(t0, t1) {
+                    BVH { tree: BVHNode::Leaf(leaf), bbox }
                 } else {
                     panic!("no bounding box in bvh node");
                 }
             },
 
             _ => {
-                let right = Box::new(BVHNode::new(&mut hittables.drain(len / 2..).collect(), t0, t1));
-                let left = Box::new(BVHNode::new(hittables, t0, t1));
-                let bbox = left.bbox.merge(right.bbox);
-                BVHNode { left: left as Box<dyn Hittable>, right: right as Box<dyn Hittable>, bbox }
+                let right = BVH::new(hittables.drain(len / 2..).collect(), t0, t1);
+                let left = BVH::new(hittables, t0, t1);
+                let bbox = right.bbox.merge(left.bbox);
+                BVH { tree: BVHNode::Branch { left: Box::new(left), right: Box::new(right) }, bbox }
             }
         }
     }
 }
 
-impl Hittable for BVHNode {
-    fn hit(&self, r: &Ray, t0: f64, t1: f64) -> Option<HitRecord> {
-        if !self.bbox.hit(r, t0..t1) {
+impl Hittable for BVH {
+    fn hit(&self, r: &Ray, t0: f64, mut t1: f64) -> Option<HitRecord> {
+        if !self.bbox.hit(r, t0, t1) {
             return None;
         }
 
-        let left = self.left.hit(r, t0, t1);
-        let right = self.right.hit(r, t0, t1);
-
-        match (left, right) {
-            (Some(l), Some(r)) => {
-                if l.t < r.t {
-                    Some(l)
-                } else {
-                    Some(r)
+        match &self.tree {
+            BVHNode::Leaf(leaf) => leaf.hit(r, t0, t1),
+            BVHNode::Branch { left, right } => {
+                let left = left.hit(r, t0, t1);
+                if let Some(l) = left {
+                    t1 = l.t
                 }
+
+                let right = right.hit(r, t0, t1);
+                if right.is_some() { right } else { left }
             }
-            (Some(h), None) => Some(h),
-            (None, Some(h)) => Some(h),
-            _ => None,
         }
     }
 
@@ -91,107 +103,3 @@ impl Hittable for BVHNode {
         Some(self.bbox)
     }
 }
-
-//pub struct BVH {
-//bounding_box: AABB,
-//size: usize,
-//contents: BVHContents,
-//}
-
-//pub enum BVHContents {
-//Node { left: Box<BVH>, right: Box<BVH> },
-//Leaf(Box<dyn Hittable>),
-//}
-
-//impl BVH {
-//pub fn new(mut objs: Vec<Box<dyn Hittable>>, exposure: Range<f64>) -> Self {
-//fn axis_range(objs: &[Box<dyn Hittable>], exposure: Range<f64>, axis: Axis) -> f64 {
-//let range = objs.iter().fold(std::f64::MAX..std::f64::MIN, |range, o| {
-//let bb = o.bounding_box(&exposure).unwrap();
-//let min = bb.min[axis].min(bb.max[axis]);
-//let max = bb.min[axis].max(bb.max[axis]);
-//range.start.min(min)..range.end.max(max)
-//});
-//range.end - range.start
-//}
-
-//let axis = {
-//let mut ranges = [
-//(X, axis_range(&objs, exposure.clone(), X)),
-//(Y, axis_range(&objs, exposure.clone(), Y)),
-//(Z, axis_range(&objs, exposure.clone(), Z)),
-//];
-//ranges.sort_unstable_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
-//ranges[0].0
-//};
-
-//objs.sort_unstable_by(|a, b| {
-//let abb = a.bounding_box(&exposure).unwrap();
-//let bbb = b.bounding_box(&exposure).unwrap();
-//let av = abb.min[axis] + abb.max[axis];
-//let bv = bbb.min[axis] + bbb.max[axis];
-//av.partial_cmp(&bv).unwrap()
-//});
-
-//match objs.len() {
-//0 => panic!("Can't create a BVH from zero objects."),
-//1 => BVH {
-//bounding_box: objs[0].bounding_box(&exposure).unwrap(),
-//size: 1,
-//contents: BVHContents::Leaf(objs.pop().unwrap()),
-//},
-//_ => {
-//let right = Box::new(BVH::new(
-//objs.drain(objs.len() / 2..).collect(),
-//exposure.clone(),
-//));
-
-//let left = Box::new(BVH::new(objs, exposure.clone()));
-
-//BVH {
-//bounding_box: left.bounding_box.merge(right.bounding_box),
-//size: left.size + right.size,
-//contents: BVHContents::Node { left, right },
-//}
-//}
-//}
-//}
-//}
-
-//impl Hittable for BVH {
-//fn hit(&self, ray: &Ray, t_min: f64, mut t_max: f64) -> Option<HitRecord> {
-//// Return 'None' if there is no collision
-//if !self.bounding_box.hit(ray, t_min..t_max) {
-//return None
-//}
-
-//// If there is a collision, return result of collision with child bounding boxes.
-//match &self.contents {
-//BVHContents::Node { left, right } => {
-//let hit_left = left.hit(ray, t_min, t_max);
-//if let Some(h) = &hit_left {
-//t_max = h.t;
-//}
-
-//let hit_right = right.hit(ray, t_min, t_max);
-
-//match (hit_left, hit_right) {
-//(h, None) | (None, h) => h,
-//(Some(h1), Some(h2)) => {
-//if h1.t < h2.t {
-//Some(h1)
-//} else {
-//Some(h2)
-//}
-//}
-//}
-//}
-//// Base case for ending recursion. Return 'HitRecord' for collision with object.
-//BVHContents::Leaf(obj) => obj.hit(ray, t_min, t_max),
-//}
-//}
-
-//fn bounding_box(&self, exposure: &Range<f64>) -> Option<AABB> {
-//Some(self.bounding_box)
-//}
-//}

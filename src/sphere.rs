@@ -73,8 +73,8 @@ impl<M: Material> Hittable for Sphere<M> {
 
     fn bounding_box(&self, _t0: f64, _t1: f64) -> Option<AABB> {
         let aabb = AABB {
-            min: self.center - Vec3::from(self.radius),
-            max: self.center + Vec3::from(self.radius),
+            min: self.center - Vec3(self.radius, self.radius, self.radius),
+            max: self.center + Vec3(self.radius, self.radius, self.radius),
         };
         Some(aabb)
     }
