@@ -1,5 +1,3 @@
-use std::ops::Range;
-
 use crate::aabb::AABB;
 
 use crate::hittable::{HitRecord, Hittable};
@@ -97,15 +95,15 @@ impl<M: Material> Hittable for MovingSphere<M> {
     }
 
     /// Calculate the bounding box of the object. Combines the bounding box for the start and end positions.
-    fn bounding_box(&self, time_range: &Range<f64>) -> Option<AABB> {
+    fn bounding_box(&self, t0: f64, t1: f64) -> Option<AABB> {
         let aabb1 = AABB {
-            min: self.center(time_range.start) - Vec3::from(self.radius),
-            max: self.center(time_range.start) + Vec3::from(self.radius),
+            min: self.center(t0) - Vec3::from(self.radius),
+            max: self.center(t0) + Vec3::from(self.radius),
         };
 
         let aabb2 = AABB {
-            min: self.center(time_range.end) - Vec3::from(self.radius),
-            max: self.center(time_range.end) + Vec3::from(self.radius),
+            min: self.center(t1) - Vec3::from(self.radius),
+            max: self.center(t1) + Vec3::from(self.radius),
         };
 
         let output_box = aabb1.merge(aabb2);

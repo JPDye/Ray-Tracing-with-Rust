@@ -1,4 +1,3 @@
-use crate::vec::Axis::*;
 use crate::vec::Vec3;
 
 use crate::ray::Ray;

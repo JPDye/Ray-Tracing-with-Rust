@@ -102,7 +102,7 @@ fn random_scene() -> HittableList {
 
 fn ray_colour(
     r: &Ray,
-    world: &BVH,
+    world: &BVHNode,
     dist: &Uniform<f64>,
     rng: &mut ThreadRng,
     depth: u32,
@@ -155,8 +155,8 @@ fn main() {
 
     // World.
     eprintln!("Building BVH");
-    let world = random_scene();
-    let world = BVH::new(world.list, 0.0..0.0);
+    let mut world = random_scene();
+    let world = BVHNode::new(&mut world.list, 0.0, 1.0);
     eprintln!("Done!");
 
     // Render
