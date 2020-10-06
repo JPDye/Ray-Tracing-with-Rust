@@ -4,8 +4,7 @@ use rand::rngs::ThreadRng;
 use crate::colour::Colour;
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
-use crate::vec::{Vec3, reflect, refract};
-
+use crate::vec::{reflect, refract, Vec3};
 
 /// Schlick's approximation
 fn schlick(cos: f64, ior: f64) -> f64 {
@@ -44,11 +43,14 @@ impl Material for Lambertian {
         dist: &Uniform<f64>,
         rng: &mut ThreadRng,
     ) -> Option<(Ray, Colour)> {
-        let scattered_ray = Ray::new(rec.p, rec.normal + Vec3::random_in_unit_sphere(dist, rng), ray.time);
+        let scattered_ray = Ray::new(
+            rec.p,
+            rec.normal + Vec3::random_in_unit_sphere(dist, rng),
+            ray.time,
+        );
         Some((scattered_ray, self.albedo))
     }
 }
-
 
 /// Metallic materials are reflective. They have a colour and a 'fuzz' value, determining how crisp the reflections are.
 #[derive(Debug, Clone, Copy)]

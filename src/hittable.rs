@@ -1,13 +1,19 @@
+use crate::aabb::AABB;
 use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec::Vec3;
 
 /// All shapes have to implement the Hittable trait in order to calculate ray intersections.
 pub trait Hittable: Sync {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
+    /// Calculate if an object was intersected.
+    fn hit(&self, r: &Ray, t0: f64, t1: f64) -> Option<HitRecord>;
+
+    /// Calculate the bounding box for an object.
+    fn bounding_box(&self, t0: f64, t1: f64) -> Option<AABB>;
 }
 
 /// A HitRecord records a collision between an object and a ray.
+#[derive(Copy, Clone)]
 pub struct HitRecord<'a> {
     pub t: f64,
     pub p: Vec3,
@@ -17,7 +23,13 @@ pub struct HitRecord<'a> {
 }
 
 impl<'a> HitRecord<'a> {
-    pub fn new(t: f64, p: Vec3, normal: Vec3, front_face: bool, material: &'a dyn Material) -> Self {
+    pub fn new(
+        t: f64,
+        p: Vec3,
+        normal: Vec3,
+        front_face: bool,
+        material: &'a dyn Material,
+    ) -> Self {
         Self {
             t,
             p,
@@ -30,7 +42,7 @@ impl<'a> HitRecord<'a> {
 
 /// A HittableList stores a collection of HitRecords and has functionality for finding the closes hit to the camera.
 pub struct HittableList {
-    list: Vec<Box<dyn Hittable>>,
+    pub list: Vec<Box<dyn Hittable>>,
 }
 
 impl HittableList {
@@ -59,5 +71,22 @@ impl Hittable for HittableList {
             }
         }
         hit_obj
+    }
+
+    fn bounding_box(&self, t0: f64, t1: f64) -> Option<AABB> {
+        match self.list.first() {
+            Some(first) => {
+                match first.bounding_box(t0, t1) {
+                    Some(bbox) => self.list.iter().skip(1).try_fold(bbox, |acc, hittable| {
+                        match hittable.bounding_box(t0, t1) {
+                            Some(bbox) => Some(acc.merge(bbox)),
+                            _ => None,
+                        }
+                    }),
+                    _ => None,
+                }
+            }
+            _ => None,
+        }
     }
 }

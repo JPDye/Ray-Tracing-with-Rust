@@ -13,6 +13,9 @@ use material::*;
 mod camera;
 use camera::*;
 
+mod bvh;
+use bvh::*;
+
 mod aabb;
 use aabb::*;
 
@@ -28,7 +31,6 @@ use sphere::*;
 mod vec;
 use vec::*;
 
-
 mod ray;
 use ray::*;
 
@@ -43,8 +45,8 @@ fn random_scene() -> HittableList {
         ground,
     )));
 
-    for a in -11..11 {
-        for b in -11..11 {
+    for a in -50..50 {
+        for b in -50..50 {
             let choose_material = rng.gen::<f64>();
             let center = Vec3(
                 a as f64 + 0.9 * rng.gen::<f64>(),
@@ -64,7 +66,9 @@ fn random_scene() -> HittableList {
                     let center2 = center + Vec3(0.0, rng.gen_range(0.0, 0.5), 0.0);
 
                     let sphere_mat = Lambertian::new(albedo);
-                    world.push(Box::new(MovingSphere::new(center, center2, 0.0, 1.0, 0.2, sphere_mat)));
+                    world.push(Box::new(MovingSphere::new(
+                        center, center2, 0.0, 1.0, 0.2, sphere_mat,
+                    )));
                 } else if choose_material < 0.95 {
                     // Metal
                     let fuzz = rng.gen_range(0.0, 0.5);
@@ -88,11 +92,7 @@ fn random_scene() -> HittableList {
     world.push(Box::new(Sphere::new(Vec3(0.0, 1.0, 0.0), 1.0, glass)));
 
     let lambert = Lambertian::new(Colour::new(0.4, 0.2, 0.1));
-    world.push(Box::new(Sphere::new(
-        Vec3(-4.0, 1.0, 0.0),
-        1.0,
-        lambert,
-    )));
+    world.push(Box::new(Sphere::new(Vec3(-4.0, 1.0, 0.0), 1.0, lambert)));
 
     let metal = Metal::new(Colour::new(0.7, 0.6, 0.5), 0.0);
     world.push(Box::new(Sphere::new(Vec3(4.0, 1.0, 0.0), 1.0, metal)));
@@ -102,7 +102,7 @@ fn random_scene() -> HittableList {
 
 fn ray_colour(
     r: &Ray,
-    world: &HittableList,
+    world: &Box<dyn Hittable>,
     dist: &Uniform<f64>,
     rng: &mut ThreadRng,
     depth: u32,
@@ -124,10 +124,10 @@ fn ray_colour(
 fn main() {
     // Constants
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
-    const IMAGE_WIDTH: u32 = 400;
+    const IMAGE_WIDTH: u32 = 100;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
-    const NUM_SAMPLES: u32 = 100;
-    const MAX_DEPTH: u32 = 30;
+    const NUM_SAMPLES: u32 = 50;
+    const MAX_DEPTH: u32 = 10;
 
     // RNG. Using uniform distribion for improved performance when generating lots of random numbers.
 
@@ -155,6 +155,12 @@ fn main() {
 
     // World.
     let world = random_scene();
+
+    let world = Box::new(world) as Box<dyn Hittable>;
+
+    //eprintln!("Building BVH");
+    //let world = Box::new(BVH::new(world.list, 0.0, 1.0)) as Box<dyn Hittable>;
+    //eprintln!("Done!");
 
     // Render
     let image = (0..IMAGE_HEIGHT)

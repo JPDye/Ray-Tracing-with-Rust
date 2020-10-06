@@ -1,7 +1,9 @@
+use crate::aabb::AABB;
+
 use crate::hittable::{HitRecord, Hittable};
 use crate::material::Material;
-use crate::vec::Vec3;
 use crate::ray::Ray;
+use crate::vec::Vec3;
 
 #[derive(Debug, Clone, Copy)]
 pub struct MovingSphere<M: Material> {
@@ -13,8 +15,15 @@ pub struct MovingSphere<M: Material> {
     material: M,
 }
 
-impl <M:Material> MovingSphere<M> {
-    pub fn new(center0: Vec3, center1: Vec3, time0: f64, time1: f64, radius: f64, material: M) -> Self {
+impl<M: Material> MovingSphere<M> {
+    pub fn new(
+        center0: Vec3,
+        center1: Vec3,
+        time0: f64,
+        time1: f64,
+        radius: f64,
+        material: M,
+    ) -> Self {
         Self {
             center0,
             center1,
@@ -25,9 +34,9 @@ impl <M:Material> MovingSphere<M> {
         }
     }
 
+    /// Return the center of the sphere at a specific point in time.
     pub fn center(&self, time: f64) -> Vec3 {
-        self.center0 + (self.center1 - self.center0) * ((time - self.time0) / (self.time1 - self.time0))
-
+        self.center0 + ((time - self.time0) / (self.time1 - self.time0)) * (self.center1 - self.center0)
     }
 
     /// Create HitRecord for an intersection with a ray. Helper for Hittable trait.
@@ -52,7 +61,6 @@ impl <M:Material> MovingSphere<M> {
 impl<M: Material> Hittable for MovingSphere<M> {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let oc = r.origin - self.center(r.time);
-
 
         // Calculate discriminant
         let a = r.direction.mag_sqr();
@@ -83,5 +91,21 @@ impl<M: Material> Hittable for MovingSphere<M> {
             }
         }
         None
+    }
+
+    /// Calculate the bounding box of the object. Combines the bounding box for the start and end positions.
+    fn bounding_box(&self, t0: f64, t1: f64) -> Option<AABB> {
+        let aabb1 = AABB {
+            min: self.center(t0) - Vec3::from(self.radius),
+            max: self.center(t0) + Vec3::from(self.radius),
+        };
+
+        let aabb2 = AABB {
+            min: self.center(t1) - Vec3::from(self.radius),
+            max: self.center(t1) + Vec3::from(self.radius),
+        };
+
+        let output_box = aabb1.merge(aabb2);
+        Some(output_box)
     }
 }

@@ -7,6 +7,16 @@ Rust implementation of the code found in the Ray Tracing series by Peter Shirley
 
 
 ## Progress
+
+### Extra
+<details><summary>Concurrency</summary>
+  <p align="center">
+    <img src="https://github.com/JPDye/Ray-Tracing-with-Rust/blob/master/img/chapter13.jpg" />
+  </p>
+  <p>Concurrency with Rayon. Reduced final image render time for 60+ minutes to 8 minutes.</p>
+</details>
+
+
 ### Book 2
 <details><summary>Chapter 1</summary>
   <p align="center">
@@ -17,13 +27,6 @@ Rust implementation of the code found in the Ray Tracing series by Peter Shirley
 
 
 ### Book 1
-<details><summary>Chapter 13</summary>
-  <p align="center">
-    <img src="https://github.com/JPDye/Ray-Tracing-with-Rust/blob/master/img/chapter13.jpg" />
-  </p>
-  <p>Concurrency with Rayon. Reduced final image render time for 60+ minutes to 8 minutes.</p>
-</details>
-
 <details><summary>Chapter 12</summary>
   <p align="center">
     <img src="https://github.com/JPDye/Ray-Tracing-with-Rust/blob/master/img/chapter12.jpg" />
@@ -37,7 +40,6 @@ Rust implementation of the code found in the Ray Tracing series by Peter Shirley
   </p>
   <p>Depth of field added.</p>
 </details>
-
 
 <details><summary>Chapter 10</summary>
   <p align="center">
