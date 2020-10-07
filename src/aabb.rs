@@ -1,7 +1,6 @@
 use crate::vec::Vec3;
-use crate::vec::Axis::{self, *};
-
 use crate::ray::Ray;
+
 
 #[derive(Copy, Clone, Debug)]
 pub struct AABB {
@@ -28,7 +27,7 @@ impl AABB {
         );
 
         let start = t_min.max(t0.reduce(f64::max));
-        let end = t_max.min(t1.reduce(f64::max));
+        let end = t_max.min(t1.reduce(f64::min));
         end > start
     }
 }

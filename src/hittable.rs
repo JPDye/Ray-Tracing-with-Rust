@@ -50,10 +50,6 @@ impl HittableList {
         HittableList { list: Vec::new() }
     }
 
-    pub fn from(list: Vec<Box<dyn Hittable>>) -> Self {
-        Self { list }
-    }
-
     pub fn push(&mut self, item: Box<dyn Hittable>) {
         self.list.push(item);
     }

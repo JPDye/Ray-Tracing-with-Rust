@@ -16,11 +16,6 @@ use camera::*;
 mod bvh;
 use bvh::*;
 
-mod aabb;
-use aabb::*;
-
-mod moving_sphere;
-use moving_sphere::*;
 
 mod colour;
 use colour::*;
@@ -34,6 +29,8 @@ use vec::*;
 mod ray;
 use ray::*;
 
+mod aabb;
+
 fn random_scene() -> HittableList {
     let mut world = HittableList::new();
     let mut rng = rand::thread_rng();
@@ -45,8 +42,8 @@ fn random_scene() -> HittableList {
         ground,
     )));
 
-    for a in -50..50 {
-        for b in -50..50 {
+    for a in -10..10 {
+        for b in -10..10 {
             let choose_material = rng.gen::<f64>();
             let center = Vec3(
                 a as f64 + 0.9 * rng.gen::<f64>(),
@@ -63,12 +60,8 @@ fn random_scene() -> HittableList {
                         rng.gen::<f64>() * rng.gen::<f64>(),
                     );
 
-                    let center2 = center + Vec3(0.0, rng.gen_range(0.0, 0.5), 0.0);
-
                     let sphere_mat = Lambertian::new(albedo);
-                    world.push(Box::new(MovingSphere::new(
-                        center, center2, 0.0, 1.0, 0.2, sphere_mat,
-                    )));
+                    world.push(Box::new(Sphere::new(center, 0.2, sphere_mat)));
                 } else if choose_material < 0.95 {
                     // Metal
                     let fuzz = rng.gen_range(0.0, 0.5);
@@ -126,10 +119,8 @@ fn main() {
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
     const IMAGE_WIDTH: u32 = 100;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
-    const NUM_SAMPLES: u32 = 50;
-    const MAX_DEPTH: u32 = 10;
-
-    // RNG. Using uniform distribion for improved performance when generating lots of random numbers.
+    const NUM_SAMPLES: u32 = 500;
+    const MAX_DEPTH: u32 = 50;
 
     // Camera.
     let look_from = Vec3(13.0, 2.0, 3.0);
@@ -156,11 +147,10 @@ fn main() {
     // World.
     let world = random_scene();
 
-    let world = Box::new(world) as Box<dyn Hittable>;
+    //let world = Box::new(world) as Box<dyn Hittable>;
 
-    //eprintln!("Building BVH");
-    //let world = Box::new(BVH::new(world.list, 0.0, 1.0)) as Box<dyn Hittable>;
-    //eprintln!("Done!");
+    let world = Box::new(BVH::new(world.list, 0.0, 1.0)) as Box<dyn Hittable>;
+    eprintln!("Built BVH");
 
     // Render
     let image = (0..IMAGE_HEIGHT)
