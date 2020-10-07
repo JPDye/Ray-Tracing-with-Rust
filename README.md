@@ -18,6 +18,14 @@ Rust implementation of the code found in the Ray Tracing series by Peter Shirley
 
 
 ### Book 2
+
+<details><summary>Chapter 2</summary>
+  <p align="center">
+    <img src="https://github.com/JPDye/Ray-Tracing-with-Rust/blob/master/img/book2_chapter2.jpg" />
+  </p>
+  <p>BVH acceleration structure. Reduces render time from 9 minutes to 3 minutes. 200% speed increase. </p>
+</details>
+
 <details><summary>Chapter 1</summary>
   <p align="center">
     <img src="https://github.com/JPDye/Ray-Tracing-with-Rust/blob/master/img/book2_chapter1.jpg" />
