@@ -1,14 +1,12 @@
-use rayon::prelude::*;
+mod material;
+mod texture;
+mod aabb;
 
-use rand::distributions::{Distribution, Uniform};
-use rand::rngs::ThreadRng;
-use rand::Rng;
+mod scenes;
+use scenes::*;
 
 mod hittable;
 use hittable::*;
-
-mod material;
-use material::*;
 
 mod camera;
 use camera::*;
@@ -16,12 +14,10 @@ use camera::*;
 mod bvh;
 use bvh::*;
 
-
 mod colour;
 use colour::*;
 
 mod sphere;
-use sphere::*;
 
 mod vec;
 use vec::*;
@@ -29,69 +25,10 @@ use vec::*;
 mod ray;
 use ray::*;
 
-mod aabb;
+use rand::distributions::{Distribution, Uniform};
+use rand::rngs::ThreadRng;
 
-fn random_scene() -> HittableList {
-    let mut world = HittableList::new();
-    let mut rng = rand::thread_rng();
-
-    let ground = Lambertian::new(Colour::new(0.5, 0.5, 0.5));
-    world.push(Box::new(Sphere::new(
-        Vec3(0.0, -1000.0, 0.0),
-        1000.0,
-        ground,
-    )));
-
-    for a in -10..10 {
-        for b in -10..10 {
-            let choose_material = rng.gen::<f64>();
-            let center = Vec3(
-                a as f64 + 0.9 * rng.gen::<f64>(),
-                0.2,
-                b as f64 + 0.9 * rng.gen::<f64>(),
-            );
-
-            if (center - Vec3(4.0, 0.2, 0.0)).mag() > 0.9 {
-                if choose_material < 0.8 {
-                    // Diffuse
-                    let albedo = Colour::new(
-                        rng.gen::<f64>() * rng.gen::<f64>(),
-                        rng.gen::<f64>() * rng.gen::<f64>(),
-                        rng.gen::<f64>() * rng.gen::<f64>(),
-                    );
-
-                    let sphere_mat = Lambertian::new(albedo);
-                    world.push(Box::new(Sphere::new(center, 0.2, sphere_mat)));
-                } else if choose_material < 0.95 {
-                    // Metal
-                    let fuzz = rng.gen_range(0.0, 0.5);
-                    let albedo = Colour::new(
-                        rng.gen_range(0.5, 1.0),
-                        rng.gen_range(0.5, 1.0),
-                        rng.gen_range(0.5, 1.0),
-                    );
-                    let sphere_mat = Metal::new(albedo, fuzz);
-                    world.push(Box::new(Sphere::new(center, 0.2, sphere_mat)));
-                } else {
-                    // Glass
-                    let sphere_mat = Dielectric::new(1.5);
-                    world.push(Box::new(Sphere::new(center, 0.2, sphere_mat)));
-                }
-            }
-        }
-    }
-
-    let glass = Dielectric::new(1.5);
-    world.push(Box::new(Sphere::new(Vec3(0.0, 1.0, 0.0), 1.0, glass)));
-
-    let lambert = Lambertian::new(Colour::new(0.4, 0.2, 0.1));
-    world.push(Box::new(Sphere::new(Vec3(-4.0, 1.0, 0.0), 1.0, lambert)));
-
-    let metal = Metal::new(Colour::new(0.7, 0.6, 0.5), 0.0);
-    world.push(Box::new(Sphere::new(Vec3(4.0, 1.0, 0.0), 1.0, metal)));
-
-    world
-}
+use rayon::prelude::*;
 
 fn ray_colour(
     r: &Ray,
@@ -117,40 +54,21 @@ fn ray_colour(
 fn main() {
     // Constants
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
-    const IMAGE_WIDTH: u32 = 100;
+    const IMAGE_WIDTH: u32 = 1200;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
     const NUM_SAMPLES: u32 = 500;
     const MAX_DEPTH: u32 = 50;
 
-    // Camera.
-    let look_from = Vec3(13.0, 2.0, 3.0);
-    let look_at = Vec3(0.0, 0.0, 0.0);
-    let vup = Vec3(0.0, 1.0, 0.0);
-    let vfov = 20.0;
-    let aperture = 0.1;
-    let focus_dist = 10.0;
-    let time0 = 0.0;
-    let time1 = 1.0;
+    // Scene creation
+    let choice = 2;
+    let (world, camera) = match choice {
+        1 => random_scene(ASPECT_RATIO),
+        2 => two_spheres(ASPECT_RATIO),
+        _ => panic!("invalid scene selection"),
+    };
 
-    let camera = Camera::new(
-        look_from,
-        look_at,
-        vup,
-        vfov,
-        ASPECT_RATIO,
-        aperture,
-        focus_dist,
-        time0,
-        time1,
-    );
-
-    // World.
-    let world = random_scene();
-
-    //let world = Box::new(world) as Box<dyn Hittable>;
-
+    // BVH
     let world = Box::new(BVH::new(world.list, 0.0, 1.0)) as Box<dyn Hittable>;
-    eprintln!("Built BVH");
 
     // Render
     let image = (0..IMAGE_HEIGHT)
@@ -181,7 +99,8 @@ fn main() {
         })
         .collect::<Vec<u8>>();
 
-    // Render
+
+    // Write
     println!("P3\n {} {}\n255", IMAGE_WIDTH, IMAGE_HEIGHT);
     for colour in image.chunks(3) {
         println!("{} {} {}", colour[0], colour[1], colour[2]);

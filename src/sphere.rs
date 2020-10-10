@@ -3,7 +3,19 @@ use crate::aabb::AABB;
 use crate::hittable::{HitRecord, Hittable};
 use crate::material::Material;
 use crate::ray::Ray;
+
+use crate::vec::Axis::{self, *};
 use crate::vec::Vec3;
+
+use std::f64::consts::PI;
+
+fn get_sphere_uv(p: Vec3) -> (f64, f64) {
+    let phi = p[Z].atan2(p[X]);
+    let theta = p[Y].asin();
+    let u = 1.0 - (phi + PI) / (2.0 * PI);
+    let v = (theta + PI / 2.0) / PI;
+    (u, v)
+}
 
 #[derive(Debug, Clone, Copy)]
 pub struct Sphere<M: Material> {
@@ -37,14 +49,15 @@ impl<M: Material> Sphere<M> {
             norm = outward_norm;
             front_face = true;
         }
-        HitRecord::new(t, p, norm, front_face, &self.material)
+
+        let (u, v) = get_sphere_uv((p - self.center) / self.radius);
+        HitRecord::new(u, v, t, p, norm, front_face, &self.material)
     }
 }
 
 impl<M: Material> Hittable for Sphere<M> {
     /// Calculate roots for an Sphere intersection using quadratic formula.
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
-
         let oc = r.origin - self.center;
 
         // Calculate discriminant
@@ -115,7 +128,8 @@ impl<M: Material> MovingSphere<M> {
 
     /// Return the center of the sphere at a specific point in time.
     pub fn center(&self, time: f64) -> Vec3 {
-        self.center0 + ((time - self.time0) / (self.time1 - self.time0)) * (self.center1 - self.center0)
+        self.center0
+            + ((time - self.time0) / (self.time1 - self.time0)) * (self.center1 - self.center0)
     }
 
     /// Create HitRecord for an intersection with a ray. Helper for Hittable trait.
@@ -133,7 +147,9 @@ impl<M: Material> MovingSphere<M> {
             norm = outward_norm;
             front_face = true;
         }
-        HitRecord::new(t, p, norm, front_face, &self.material)
+
+        let (u, v) = get_sphere_uv((p - self.center(r.time)) / self.radius);
+        HitRecord::new(u, v, t, p, norm, front_face, &self.material)
     }
 }
 

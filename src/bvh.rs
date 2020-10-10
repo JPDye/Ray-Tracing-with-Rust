@@ -15,7 +15,6 @@ pub enum BVHContents {
     Leaf(Box<dyn Hittable>),
 }
 
-
 impl BVH {
     pub fn new(mut objs: Vec<Box<dyn Hittable>>, t0: f64, t1: f64) -> Self {
         fn axis_range(objs: &[Box<dyn Hittable>], t0: f64, t1: f64, axis: Axis) -> f64 {
@@ -71,14 +70,16 @@ impl BVH {
 impl Hittable for BVH {
     fn hit(&self, r: &Ray, t0: f64, mut t1: f64) -> Option<HitRecord> {
         if !self.bounding_box.hit(r, t0, t1) {
-            return None
+            return None;
         }
 
         match &self.contents {
             BVHContents::Leaf(obj) => obj.hit(r, t0, t1),
             BVHContents::Node { left, right } => {
                 let hit_left = left.hit(r, t0, t1);
-                if let Some(h) = &hit_left { t1 = h.t }
+                if let Some(h) = &hit_left {
+                    t1 = h.t
+                }
                 let hit_right = right.hit(r, t0, t1);
 
                 match (hit_left, hit_right) {
@@ -91,7 +92,7 @@ impl Hittable for BVH {
                         }
                     }
                 }
-            },
+            }
         }
     }
 
@@ -99,14 +100,3 @@ impl Hittable for BVH {
         Some(self.bounding_box)
     }
 }
-
-
-
-
-
-
-
-
-
-
-
