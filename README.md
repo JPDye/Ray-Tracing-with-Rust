@@ -18,6 +18,15 @@ Rust implementation of the code found in the Ray Tracing series by Peter Shirley
 
 
 ### Book 2
+<details><summary>Chapter 2</summary>
+    <p align="center">
+    <img src="https://github.com/JPDye/Ray-Tracing-with-Rust/blob/master/img/book2_chapter3.1.jpg" />
+  </p>
+  <p align="center">
+    <img src="https://github.com/JPDye/Ray-Tracing-with-Rust/blob/master/img/book2_chapter3.2.jpg" />
+  </p>
+  <p>Ground work for allowing real textures.</p>
+</details>
 
 <details><summary>Chapter 2</summary>
   <p align="center">

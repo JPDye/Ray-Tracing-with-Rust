@@ -6,6 +6,8 @@ use crate::hittable::HitRecord;
 use crate::ray::Ray;
 use crate::vec::{reflect, refract, Vec3};
 
+use crate::texture::Texture;
+
 /// Schlick's approximation
 fn schlick(cos: f64, ior: f64) -> f64 {
     let r0 = ((1.0 - ior) / (1.0 + ior)).powi(2);
@@ -25,17 +27,17 @@ pub trait Material: Sync {
 
 /// Lambertian materials a diffuse. For this program, they reflect 50% of light.
 #[derive(Debug, Clone, Copy)]
-pub struct Lambertian {
-    albedo: Colour,
+pub struct Lambertian<T: Texture> {
+    albedo: T,
 }
 
-impl Lambertian {
-    pub fn new(albedo: Colour) -> Self {
+impl<T: Texture> Lambertian<T> {
+    pub fn new(albedo: T) -> Self {
         Self { albedo }
     }
 }
 
-impl Material for Lambertian {
+impl<T: Texture> Material for Lambertian<T> {
     fn scatter(
         &self,
         rec: &HitRecord,
@@ -48,7 +50,9 @@ impl Material for Lambertian {
             rec.normal + Vec3::random_in_unit_sphere(dist, rng),
             ray.time,
         );
-        Some((scattered_ray, self.albedo))
+
+        let attenuation = self.albedo.value(rec.u, rec.v, rec.p);
+        Some((scattered_ray, attenuation))
     }
 }
 

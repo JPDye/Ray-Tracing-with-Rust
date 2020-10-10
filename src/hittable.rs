@@ -15,15 +15,19 @@ pub trait Hittable: Sync {
 /// A HitRecord records a collision between an object and a ray.
 #[derive(Copy, Clone)]
 pub struct HitRecord<'a> {
-    pub t: f64,
-    pub p: Vec3,
-    pub normal: Vec3,
-    pub front_face: bool,
-    pub material: &'a dyn Material,
+    pub u: f64,
+    pub v: f64,
+    pub t: f64,           // 't' parameter for the ray's position at the time of collision.
+    pub p: Vec3,          // Intersecting ray.
+    pub normal: Vec3,     // Normal vector of the intersected object.
+    pub front_face: bool, // Flag for detemrining whether the ray hit the inside or outside of an objeect.
+    pub material: &'a dyn Material, // The material assigned to the intersected object.
 }
 
 impl<'a> HitRecord<'a> {
     pub fn new(
+        u: f64,
+        v: f64,
         t: f64,
         p: Vec3,
         normal: Vec3,
@@ -31,6 +35,8 @@ impl<'a> HitRecord<'a> {
         material: &'a dyn Material,
     ) -> Self {
         Self {
+            u,
+            v,
             t,
             p,
             normal,
