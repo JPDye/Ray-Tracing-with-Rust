@@ -1,6 +1,13 @@
-mod material;
-mod texture;
 mod aabb;
+mod camera;
+mod material;
+mod perlin;
+mod sphere;
+mod texture;
+mod vec;
+
+mod cuboid;
+mod rect;
 
 mod scenes;
 use scenes::*;
@@ -8,19 +15,11 @@ use scenes::*;
 mod hittable;
 use hittable::*;
 
-mod camera;
-use camera::*;
-
 mod bvh;
 use bvh::*;
 
 mod colour;
 use colour::*;
-
-mod sphere;
-
-mod vec;
-use vec::*;
 
 mod ray;
 use ray::*;
@@ -32,38 +31,42 @@ use rayon::prelude::*;
 
 fn ray_colour(
     r: &Ray,
+    bg: Colour,
     world: &Box<dyn Hittable>,
     dist: &Uniform<f64>,
     rng: &mut ThreadRng,
     depth: u32,
 ) -> Colour {
     if let Some(hit) = world.hit(r, 0.001, f64::MAX) {
+        let emitted = hit.material.emitted(hit.u, hit.v, hit.p, dist, rng);
         if depth > 0 {
             if let Some((scattered, attenuation)) = hit.material.scatter(&hit, r, dist, rng) {
-                return attenuation * ray_colour(&scattered, world, dist, rng, depth - 1);
+                return emitted + attenuation * ray_colour(&scattered, bg, world, dist, rng, depth - 1);
             }
         }
-        Colour::new(0.0, 0.0, 0.0)
+        emitted
     } else {
-        let norm_dir = r.direction.normalise();
-        let t = 0.5 * (norm_dir.1 + 1.0);
-        return Colour::new(1.0, 1.0, 1.0) * (1.0 - t) + Colour::new(0.3, 0.5, 1.0) * t;
+        bg
     }
 }
 
 fn main() {
     // Constants
-    const ASPECT_RATIO: f64 = 16.0 / 9.0;
+    //const ASPECT_RATIO: f64 = 16.0 / 9.0;
+    const ASPECT_RATIO: f64 = 1.0;
     const IMAGE_WIDTH: u32 = 1200;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
-    const NUM_SAMPLES: u32 = 500;
+    const NUM_SAMPLES: u32 = 1000;
     const MAX_DEPTH: u32 = 50;
 
     // Scene creation
-    let choice = 2;
+    let choice = 5;
     let (world, camera) = match choice {
         1 => random_scene(ASPECT_RATIO),
-        2 => two_spheres(ASPECT_RATIO),
+        2 => two_checkered_spheres(ASPECT_RATIO),
+        3 => two_perlin_spheres(ASPECT_RATIO),
+        4 => simple_light(ASPECT_RATIO),
+        5 => cornell_box(ASPECT_RATIO),
         _ => panic!("invalid scene selection"),
     };
 
@@ -86,7 +89,7 @@ fn main() {
                         let u = (i as f64 + dist.sample(&mut rng)) / IMAGE_WIDTH as f64;
                         let v = (j as f64 + dist.sample(&mut rng)) / IMAGE_HEIGHT as f64;
                         let r = camera.get_ray(u, v, &mut rng);
-                        c += ray_colour(&r, &world, &dist, &mut rng, MAX_DEPTH);
+                        c += ray_colour(&r, camera.bg, &world, &dist, &mut rng, MAX_DEPTH);
                     }
 
                     vec![
@@ -98,7 +101,6 @@ fn main() {
                 .collect::<Vec<u8>>()
         })
         .collect::<Vec<u8>>();
-
 
     // Write
     println!("P3\n {} {}\n255", IMAGE_WIDTH, IMAGE_HEIGHT);

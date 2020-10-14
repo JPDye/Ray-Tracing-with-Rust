@@ -4,6 +4,8 @@ use rand::rngs::ThreadRng;
 use crate::ray::Ray;
 use crate::vec::Vec3;
 
+use crate::colour::Colour;
+
 pub fn deg_to_rad(deg: f64) -> f64 {
     deg / 180.0 * std::f64::consts::PI
 }
@@ -22,6 +24,7 @@ pub fn random_in_unit_disk(dist: &Uniform<f64>, rng: &mut ThreadRng) -> Vec3 {
 }
 
 pub struct Camera {
+    pub bg: Colour,
     origin: Vec3,
     vertical: Vec3,
     horizontal: Vec3,
@@ -34,6 +37,7 @@ pub struct Camera {
 
 impl Camera {
     pub fn new(
+        bg: Colour,
         look_from: Vec3,
         look_at: Vec3,
         vup: Vec3,
@@ -63,6 +67,7 @@ impl Camera {
         let dist = Uniform::from(time0..time1);
 
         Self {
+            bg,
             origin,
             vertical,
             horizontal,

@@ -3,6 +3,8 @@ use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec::Vec3;
 
+use crate::colour::Colour;
+
 /// All shapes have to implement the Hittable trait in order to calculate ray intersections.
 pub trait Hittable: Sync {
     /// Calculate if an object was intersected.

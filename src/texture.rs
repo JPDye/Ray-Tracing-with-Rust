@@ -1,5 +1,7 @@
 use crate::colour::Colour;
 
+use crate::perlin::Perlin;
+
 use crate::vec::Axis::*;
 use crate::vec::Vec3;
 
@@ -47,5 +49,25 @@ impl<T: Texture> Texture for CheckeredTexture<T> {
         } else {
             self.even.value(u, v, p)
         }
+    }
+}
+
+/// A noise 'Texture' using Perlin noise.
+#[derive(Clone)]
+pub struct NoiseTexture {
+    noise: Perlin,
+}
+
+impl NoiseTexture {
+    pub fn new() -> Self {
+        Self {
+            noise: Perlin::new(),
+        }
+    }
+}
+
+impl Texture for NoiseTexture {
+    fn value(&self, _u: f64, _v: f64, p: Vec3) -> Colour {
+        Colour::new(1.0, 1.0, 1.0) * self.noise.noise(p)
     }
 }
