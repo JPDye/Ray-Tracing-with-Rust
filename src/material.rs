@@ -23,6 +23,9 @@ pub trait Material: Sync {
         dist: &Uniform<f64>,
         rng: &mut ThreadRng,
     ) -> Option<(Ray, Colour)>;
+
+    /// Return how much light is emitted from the material. Black for anything that isn't a light source.
+    fn emitted(&self, u: f64, v: f64, p: Vec3, dist: &Uniform<f64>, rng: &mut ThreadRng) -> Colour;
 }
 
 /// Lambertian materials a diffuse. For this program, they reflect 50% of light.
@@ -53,6 +56,17 @@ impl<T: Texture> Material for Lambertian<T> {
 
         let attenuation = self.albedo.value(rec.u, rec.v, rec.p);
         Some((scattered_ray, attenuation))
+    }
+
+    fn emitted(
+        &self,
+        _u: f64,
+        _v: f64,
+        _p: Vec3,
+        _dist: &Uniform<f64>,
+        _rng: &mut ThreadRng,
+    ) -> Colour {
+        Colour::new(0.0, 0.0, 0.0)
     }
 }
 
@@ -89,6 +103,17 @@ impl Material for Metal {
         } else {
             None
         }
+    }
+
+    fn emitted(
+        &self,
+        _u: f64,
+        _v: f64,
+        _p: Vec3,
+        _dist: &Uniform<f64>,
+        _rng: &mut ThreadRng,
+    ) -> Colour {
+        Colour::new(0.0, 0.0, 0.0)
     }
 }
 
@@ -147,5 +172,51 @@ impl Material for Dielectric {
                 Some((scattered, attenuation))
             }
         }
+    }
+
+    fn emitted(
+        &self,
+        _u: f64,
+        _v: f64,
+        _p: Vec3,
+        _dist: &Uniform<f64>,
+        _rng: &mut ThreadRng,
+    ) -> Colour {
+        Colour::new(0.0, 0.0, 0.0)
+    }
+}
+
+/// DiffuseLight materials emit light of a specified colour.
+#[derive(Debug, Clone, Copy)]
+pub struct DiffuseLight<T: Texture> {
+    emit: T,
+}
+
+impl<T: Texture> DiffuseLight<T> {
+    pub fn new(emit: T) -> Self {
+        Self { emit }
+    }
+}
+
+impl<T: Texture> Material for DiffuseLight<T> {
+    fn scatter(
+        &self,
+        _rec: &HitRecord,
+        _ray: &Ray,
+        _dist: &Uniform<f64>,
+        _rng: &mut ThreadRng,
+    ) -> Option<(Ray, Colour)> {
+        None
+    }
+
+    fn emitted(
+        &self,
+        u: f64,
+        v: f64,
+        p: Vec3,
+        _dist: &Uniform<f64>,
+        _rng: &mut ThreadRng,
+    ) -> Colour {
+        self.emit.value(u, v, p)
     }
 }

@@ -4,7 +4,7 @@ use crate::hittable::{HitRecord, Hittable};
 use crate::material::Material;
 use crate::ray::Ray;
 
-use crate::vec::Axis::{self, *};
+use crate::vec::Axis::*;
 use crate::vec::Vec3;
 
 use std::f64::consts::PI;

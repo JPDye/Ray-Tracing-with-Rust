@@ -18,6 +18,15 @@ Rust implementation of the code found in the Ray Tracing series by Peter Shirley
 
 
 ### Book 2
+<details><summary>Chapter 6</summary>
+    <p align="center">
+    <img src="https://github.com/JPDye/Ray-Tracing-with-Rust/blob/master/img/book2_chapter6.jpg" />
+  </p>
+  <p>Lighting finally added. Uses area lights. Created axis aligned rectangles to make this easier to use.</p>
+</details>
+
+
+
 <details><summary>Chapter 3</summary>
     <p align="center">
     <img src="https://github.com/JPDye/Ray-Tracing-with-Rust/blob/master/img/book2_chapter3.1.jpg" />
