@@ -1,5 +1,7 @@
 # Ray Tracing with Rust
-Rust implementation of the code found in the Ray Tracing series by Peter Shirley. I am using the code of <a href="https://github.com/fralken">fralken</a> and <a href="https://github.com/cbiffle/rtiow-rust">cbiffle</a> as a guide for writing idiomatic Rust.
+Rust implementation of the code found in the Ray Tracing series by Peter Shirley using the code of <a href="https://github.com/fralken">fralken</a> and <a href="https://github.com/cbiffle/rtiow-rust">cbiffle</a> as a guide for writing idiomatic Rust. 
+
+Peter Shirley's series describes the implementation of a basic ray tracer using Whitted's algorithm and later develops the ray tracer to use Monte-Carlo integration to achieve global illumination. I have added importance sampling (to sample rays less from the near horizon of the reflection hemispehre and more from the center/top) and russian roulette (to skip the tracing of rays which contribute very little to the final image) as optimisations on top of what the book shows.
 
 <p align="center">
   <img src="https://github.com/JPDye/Ray-Tracing-with-Rust/blob/master/img/test.jpg" />
