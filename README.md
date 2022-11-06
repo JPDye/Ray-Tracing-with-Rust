@@ -7,6 +7,10 @@ Peter Shirley's series describes the implementation of a basic ray tracer using 
   <img src="https://github.com/JPDye/Ray-Tracing-with-Rust/blob/master/img/test.jpg" />
 </p>
 
+## Usage
+	   cargo run --release > image.ppm
+     
+Change settings in file. Should have a CLI but I was a Rust baby.
 
 ## Progress
 
