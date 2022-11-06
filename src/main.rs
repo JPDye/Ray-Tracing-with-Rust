@@ -41,7 +41,8 @@ fn ray_colour(
         let emitted = hit.material.emitted(hit.u, hit.v, hit.p, dist, rng);
         if depth > 0 {
             if let Some((scattered, attenuation)) = hit.material.scatter(&hit, r, dist, rng) {
-                return emitted + attenuation * ray_colour(&scattered, bg, world, dist, rng, depth - 1);
+                return emitted
+                    + attenuation * ray_colour(&scattered, bg, world, dist, rng, depth - 1);
             }
         }
         emitted
@@ -54,9 +55,9 @@ fn main() {
     // Constants
     //const ASPECT_RATIO: f64 = 16.0 / 9.0;
     const ASPECT_RATIO: f64 = 1.0;
-    const IMAGE_WIDTH: u32 = 1200;
+    const IMAGE_WIDTH: u32 = 300;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
-    const NUM_SAMPLES: u32 = 1000;
+    const NUM_SAMPLES: u32 = 200;
     const MAX_DEPTH: u32 = 50;
 
     // Scene creation
